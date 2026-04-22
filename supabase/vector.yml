@@ -1,0 +1,44 @@
+data_dir: /var/log/vector
+
+sources:
+  docker_host:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+
+  postgres_logs:
+    type: file
+    include:
+      - /var/log/postgresql/*.log
+    read_from: beginning
+
+transforms:
+  parse_postgres_logs:
+    type: remap
+    inputs:
+      - postgres_logs
+    source: |
+      . = parse_json!(.message)
+
+  filter_postgres_errors:
+    type: filter
+    inputs:
+      - parse_postgres_logs
+    condition: |
+      .level == "error" || .level == "fatal"
+
+sinks:
+  stdout:
+    type: console
+    inputs:
+      - docker_host
+      - parse_postgres_logs
+    encoding:
+      codec: json
+
+  postgres_errors_file:
+    type: file
+    inputs:
+      - filter_postgres_errors
+    path: /var/log/postgres_errors.log
+    encoding:
+      codec: json

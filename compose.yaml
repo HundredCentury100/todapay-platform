@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # Frontend Application - React + Vite
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fulticket-app
+    ports:
+      - "8081:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_PUBLISHABLE_KEY=${VITE_SUPABASE_PUBLISHABLE_KEY}
+      - VITE_SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID}
+    command: bun run dev

@@ -1,0 +1,3 @@
+ALTER TABLE public.transactions
+ADD COLUMN IF NOT EXISTS service_fee_amount NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS user_total_charged NUMERIC DEFAULT 0;

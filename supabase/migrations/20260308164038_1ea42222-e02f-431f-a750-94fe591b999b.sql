@@ -1,0 +1,1 @@
+ALTER TABLE public.merchant_profiles ADD COLUMN IF NOT EXISTS created_by_agent_id uuid REFERENCES public.merchant_profiles(id) ON DELETE SET NULL;
