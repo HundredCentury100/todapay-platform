@@ -230,14 +230,14 @@ const SplashScreen = ({ onComplete, minDisplayTime = 2500 }: SplashScreenProps) 
                   delay: 0.9,
                 }}
               >
-                ful
+                Toda
                 <motion.span
                   className="text-white/90"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2 }}
                 >
-                  ticket
+                  Pay
                 </motion.span>
               </motion.h1>
             </motion.div>
