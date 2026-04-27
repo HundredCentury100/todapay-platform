@@ -89,7 +89,7 @@ export const WorldClassRideTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🚗 Ride Receipt\n${ride.pickup_address} → ${ride.dropoff_address}\n${formatDate(ride.created_at)}\nTotal: $${ride.total_amount.toFixed(2)}\nReceipt: ${ride.receipt_number}\n\nvia fulticket.com`;
+    const text = `🚗 Ride Receipt\n${ride.pickup_address} → ${ride.dropoff_address}\n${formatDate(ride.created_at)}\nTotal: $${ride.total_amount.toFixed(2)}\nReceipt: ${ride.receipt_number}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -318,7 +318,7 @@ export const WorldClassRideTicket = ({
         {/* Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            🚗 Thank you for riding with us! • fulticket.com
+            🚗 Thank you for riding with us! • todapayments.com
           </p>
         </div>
       </Card>

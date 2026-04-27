@@ -48,7 +48,7 @@ export const SignUpForm = ({
             "relative w-full h-full rounded-3xl flex items-center justify-center shadow-2xl bg-gradient-to-br text-white",
             isDriver ? "from-amber-500 to-orange-400" : "from-blue-500 to-cyan-400"
           )}>
-            {isDriver ? <Car className="h-10 w-10" /> : <Ticket className="h-10 w-10" />}
+            {isDriver ? <Car className="h-10 w-10" /> : <img src="/logoTodaPay.png" alt="TodaPay" className="h-10 w-10" />}
           </div>
         </motion.div>
 
@@ -57,7 +57,7 @@ export const SignUpForm = ({
         </motion.h1>
         <motion.div className="mt-2 flex items-center justify-center gap-2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-muted-foreground text-sm">Join fulticket Zimbabwe</span>
+          <span className="text-muted-foreground text-sm">Join TodaPay Zimbabwe</span>
         </motion.div>
       </div>
 
@@ -74,7 +74,7 @@ export const SignUpForm = ({
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Ticket className="h-4 w-4" /> Traveler
+            <img src="/logoTodaPay.png" alt="TodaPay" className="h-4 w-4" /> Traveler
           </button>
           <button
             type="button"
@@ -226,7 +226,7 @@ export const SignUpForm = ({
         </p>
         <p className="text-xs text-muted-foreground/70">
           Business or agent accounts are created by our admin team.{" "}
-          <a href="mailto:support@fulticket.com" className="text-primary/70 underline underline-offset-2 hover:text-primary">Contact us</a>
+          <a href="mailto:support@todapayments.com" className="text-primary/70 underline underline-offset-2 hover:text-primary">Contact us</a>
         </p>
       </motion.div>
     </>

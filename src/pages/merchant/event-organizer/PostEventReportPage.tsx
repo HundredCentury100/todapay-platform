@@ -166,7 +166,7 @@ const PostEventReportPage = () => {
     y += 6;
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text(`Generated on ${format(new Date(), "PPpp")} by FulTicket`, 20, y);
+    doc.text(`Generated on ${format(new Date(), "PPpp")} by TodaPay`, 20, y);
 
     doc.save(`${event.name.replace(/\s+/g, "_")}_Report.pdf`);
     toast.success("PDF downloaded");

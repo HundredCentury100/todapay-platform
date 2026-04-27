@@ -164,7 +164,7 @@ export function TelegramLinkCard() {
 
       <div className="space-y-3">
         <div className="text-xs text-muted-foreground bg-muted/50 rounded-xl p-3 space-y-1">
-          <p>1. Search <b>@fulticket_bot</b> on Telegram</p>
+          <p>1. Search <b>@todapay_bot</b> on Telegram</p>
           <p>2. Send <code>/start</code> to get a link code</p>
           <p>3. Enter the code below</p>
         </div>

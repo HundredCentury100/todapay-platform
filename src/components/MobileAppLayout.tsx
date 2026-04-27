@@ -41,7 +41,7 @@ const MobileAppLayout = ({
   // Announce page title to screen readers
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} | FulTicket`;
+      document.title = `${pageTitle} | TodaPay`;
     }
   }, [pageTitle]);
 
@@ -105,16 +105,16 @@ const MobileAppLayout = ({
       {/* Scroll to top button */}
       <ScrollToTopButton />
       
-      {/* Invisible Suvat Group attribution link - mobile only */}
+      {/* Invisible Toda Technologies attribution link - mobile only */}
       {!hideAttribution && (
         <a
-          href="https://suvat.tech"
+          href="https://todatech.co.zw"
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-[68px] left-1/2 -translate-x-1/2 z-[1] text-[10px] text-muted-foreground/40 font-medium pointer-events-auto md:hidden"
-          aria-label="from Suvat Group"
+          aria-label="from Toda Technologies"
         >
-          from Suvat Group
+          from Toda Technologies
         </a>
       )}
     </div>

@@ -75,7 +75,7 @@ export const generateBookingPDF = async (bookingData: any, ticketNumber: string)
         <div style="border: 3px solid #333; padding: 30px; border-radius: 12px; background: linear-gradient(to bottom, #ffffff 0%, #f9f9f9 100%);">
           <!-- Header with Platform Branding -->
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; margin: -30px -30px 20px -30px; border-radius: 12px 12px 0 0; text-align: center; color: white;">
-            <h1 style="margin: 0 0 5px 0; font-size: 28px;">fulticket.com</h1>
+            <h1 style="margin: 0 0 5px 0; font-size: 28px;">todapayments.com</h1>
             <p style="margin: 0; font-size: 12px; opacity: 0.9;">Your Premium Event Platform</p>
           </div>
           
@@ -187,13 +187,13 @@ export const generateBookingPDF = async (bookingData: any, ticketNumber: string)
           <!-- Footer -->
           <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
             <div style="color: #667eea; font-weight: bold; font-size: 16px; margin-bottom: 5px;">
-              fulticket.com
+              todapayments.com
             </div>
             <div style="color: #999; font-size: 11px;">
-              Booking Reference: ${escapeHtml(bookingData.booking_reference)} | Powered by fulticket.com
+              Booking Reference: ${escapeHtml(bookingData.booking_reference)} | Powered by todapayments.com
             </div>
             <div style="color: #999; font-size: 11px; margin-top: 5px;">
-              Help: fulticket.com/help | Terms: fulticket.com/terms
+              Help: todapayments.com/help | Terms: todapayments.com/terms
             </div>
           </div>
         </div>
@@ -390,7 +390,7 @@ export const generateMultiTicketPDF = async (bookingData: any, ticketNumbers: st
       container.innerHTML = `
         <div style="border: 3px solid #333; padding: 30px; border-radius: 12px; background: white;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; margin: -30px -30px 20px -30px; border-radius: 12px 12px 0 0; text-align: center; color: white;">
-            <h1 style="margin: 0 0 5px 0; font-size: 28px;">fulticket.com</h1>
+            <h1 style="margin: 0 0 5px 0; font-size: 28px;">todapayments.com</h1>
             <p style="margin: 0; font-size: 12px;">Ticket ${i + 1} of ${bookingData.ticket_quantity}</p>
           </div>
           

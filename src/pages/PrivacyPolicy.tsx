@@ -25,7 +25,7 @@ const PrivacyPolicy = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-3">1. Introduction</h2>
                 <p className="text-muted-foreground">
-                  Welcome to fulticket. We are a Zimbabwe-based digital platform committed to protecting your personal data. This privacy policy explains how we collect, use, store, and safeguard your information in compliance with the Data Protection Act of Zimbabwe (Chapter 11:12) and international best practices.
+                  Welcome to TodaPay. We are a Zimbabwe-based digital platform committed to protecting your personal data. This privacy policy explains how we collect, use, store, and safeguard your information in compliance with the Data Protection Act of Zimbabwe (Chapter 11:12) and international best practices.
                 </p>
               </section>
 
@@ -106,7 +106,7 @@ const PrivacyPolicy = () => {
                   <li><strong>Withdraw Consent</strong> — Withdraw consent for location tracking or promotional notifications</li>
                 </ul>
                 <p className="text-muted-foreground mt-3">
-                  To exercise any of these rights, contact us at privacy@fulticket.com or use the self-service options in your account settings.
+                  To exercise any of these rights, contact us at privacy@todapayments.com or use the self-service options in your account settings.
                 </p>
               </section>
 
@@ -156,7 +156,7 @@ const PrivacyPolicy = () => {
                 <h2 className="text-2xl font-semibold mb-3">12. Contact Us</h2>
                 <p className="text-muted-foreground">For privacy-related questions or to exercise your rights, contact us at:</p>
                 <div className="mt-3 space-y-1 text-muted-foreground">
-                  <p><strong>Data Protection Officer:</strong> privacy@fulticket.com</p>
+                  <p><strong>Data Protection Officer:</strong> privacy@todapayments.com</p>
                   <p><strong>WhatsApp:</strong> +263 78 000 0000</p>
                   <p><strong>Address:</strong> Harare, Zimbabwe</p>
                 </div>

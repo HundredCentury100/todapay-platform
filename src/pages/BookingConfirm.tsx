@@ -858,7 +858,7 @@ const BookingConfirm = () => {
                     </div>
                   </div>
                   <p className="text-center text-[10px] text-muted-foreground/50">
-                    Powered by <span className="font-semibold text-muted-foreground/70">Suvat Pay</span> · Suvat Group
+                    Powered by <span className="font-semibold text-muted-foreground/70">Suvat Pay</span> · Toda Technologies
                   </p>
                 </motion.div>
               ) : paymentView === 'suvat' ? (

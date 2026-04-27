@@ -48,7 +48,7 @@ export function AddToCalendarButton({
     
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//FulTicket//Event Calendar//EN
+PRODID:-//TodaPay//Event Calendar//EN
 BEGIN:VEVENT
 DTSTART:${formatDateForICS(startDate)}
 DTEND:${formatDateForICS(end)}

@@ -75,8 +75,8 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-70">
-            <Ticket className="h-5 w-5 text-primary" />
-            <span className="text-base font-semibold tracking-tight">fulticket</span>
+            <img src="/logoTodaPay.png" alt="TodaPay" className="h-5 w-5" />
+            <span className="text-base font-semibold tracking-tight">TodaPay</span>
           </Link>
 
           {/* Right Actions */}

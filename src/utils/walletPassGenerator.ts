@@ -34,12 +34,12 @@ interface WalletPassData {
 export const generateAppleWalletPass = (passData: WalletPassData) => {
   const passJson = {
     formatVersion: 1,
-    passTypeIdentifier: "pass.com.fulticket.ticket",
+    passTypeIdentifier: "pass.com.TodaPay.ticket",
     serialNumber: passData.bookingReference,
     teamIdentifier: "FULTICKET",
-    organizationName: "fulticket",
+    organizationName: "TodaPay",
     description: passData.type === 'bus' ? "Bus Ticket" : "Event Ticket",
-    logoText: "fulticket",
+    logoText: "TodaPay",
     foregroundColor: "rgb(255, 255, 255)",
     backgroundColor: "rgb(102, 126, 234)",
     labelColor: "rgb(255, 255, 255)",
@@ -110,7 +110,7 @@ export const generateAppleWalletPass = (passData: WalletPassData) => {
         {
           key: "terms",
           label: "Terms & Conditions",
-          value: "Visit fulticket.com/terms for full terms"
+          value: "Visit todapayments.com/terms for full terms"
         }
       ]
     } : undefined,
@@ -181,23 +181,23 @@ export const generateAppleWalletPass = (passData: WalletPassData) => {
  * Generate Google Pay pass data structure
  */
 export const generateGooglePayPass = (passData: WalletPassData) => {
-  const issuerId = "fulticket";
+  const issuerId = "TodaPay";
   const classId = passData.type === 'bus' ? `${issuerId}.bus_ticket` : `${issuerId}.event_ticket`;
   
   const passClass = passData.type === 'bus' ? {
     "id": classId,
-    "issuerName": "fulticket",
+    "issuerName": "TodaPay",
     "reviewStatus": "UNDER_REVIEW",
     "transitType": "BUS",
     "logo": {
       "sourceUri": {
-        "uri": "https://fulticket.com/logo.png"
+        "uri": "https://todapayments.com/logo.png"
       }
     },
     "hexBackgroundColor": "#667eea"
   } : {
     "id": classId,
-    "issuerName": "fulticket",
+    "issuerName": "TodaPay",
     "reviewStatus": "UNDER_REVIEW",
     "eventName": {
       "defaultValue": {
@@ -207,7 +207,7 @@ export const generateGooglePayPass = (passData: WalletPassData) => {
     },
     "logo": {
       "sourceUri": {
-        "uri": "https://fulticket.com/logo.png"
+        "uri": "https://todapayments.com/logo.png"
       }
     },
     "hexBackgroundColor": "#667eea"
@@ -312,7 +312,7 @@ export const downloadWalletPass = async (passData: WalletPassData) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `fulticket-pass-${passData.bookingReference}.json`;
+    a.download = `TodaPay-pass-${passData.bookingReference}.json`;
     a.click();
     URL.revokeObjectURL(url);
 

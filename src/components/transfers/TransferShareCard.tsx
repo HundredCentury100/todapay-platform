@@ -89,7 +89,7 @@ export const TransferShareCard = ({
                   <Car className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="font-bold text-sm">FulTicket Transfer</p>
+                  <p className="font-bold text-sm">TodaPay Transfer</p>
                   <p className="text-[10px] opacity-80">Booking Confirmation</p>
                 </div>
               </div>

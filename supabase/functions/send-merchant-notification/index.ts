@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay <support@notify.TodaPay.com>";
 const INTERNAL_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
 
 const corsHeaders = {
@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending ${status} notification to ${businessEmail}`);
 
     const subject = status === 'verified'
-      ? `Welcome to fulticket, ${businessName}!`
+      ? `Welcome to TodaPay, ${businessName}!`
       : `Application Status Update for ${businessName}`;
 
     const htmlContent = status === 'verified'
@@ -47,7 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
           alertText: 'Start by setting up your business profile, adding your routes or events, and configuring payment methods.',
           alertColor: 'success',
           ctaLabel: 'Access Your Dashboard',
-          ctaUrl: 'https://fulticket.com/merchant/auth',
+          ctaUrl: 'https://TodaPay.com/merchant/auth',
         })
       : buildPremiumEmail({
           type: 'alert',
@@ -56,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
           greeting: `Dear ${businessName},`,
           bodyText: 'We regret to inform you that your merchant application has been rejected after careful review. If you believe this was an error or would like to discuss your application, please contact our support team.',
           ctaLabel: 'Contact Support',
-          ctaUrl: 'mailto:support@fulticket.com',
+          ctaUrl: 'mailto:support@TodaPay.com',
         });
 
     await supabase.rpc('enqueue_email', {

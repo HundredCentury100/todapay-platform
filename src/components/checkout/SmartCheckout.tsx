@@ -339,7 +339,7 @@ export function SmartCheckout({
               </AlertDescription>
             </Alert>
             <div className="text-center text-[10px] text-muted-foreground">
-              Powered by <span className="font-semibold">Suvat Pay</span> · Suvat Group
+              Powered by <span className="font-semibold">Suvat Pay</span> · Toda Technologies
             </div>
           </div>
         );

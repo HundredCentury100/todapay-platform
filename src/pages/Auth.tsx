@@ -12,9 +12,13 @@ import MobileAppLayout from "@/components/MobileAppLayout";
 import { cn } from "@/lib/utils";
 import type { WizardRole } from "@/components/auth/wizard/RoleSelectionStep";
 
+const TodaPayLogo = ({ className }: { className?: string }) => (
+  <img src="/logoTodaPay.png" alt="TodaPay" className={className} />
+);
+
 const roleInfo: Record<string, { icon: any; label: string; tagline: string; gradient: string; description: string }> = {
-  consumer: { 
-    icon: Ticket, label: "Traveler", tagline: "Book. Travel. Explore Zimbabwe.", 
+  consumer: {
+    icon: TodaPayLogo, label: "Traveler", tagline: "Book. Travel. Explore Zimbabwe.",
     gradient: "from-blue-600 via-cyan-500 to-blue-400",
     description: "Your all-in-one platform for buses, events, stays, rides and more across Zimbabwe."
   },
@@ -26,7 +30,7 @@ const roleInfo: Record<string, { icon: any; label: string; tagline: string; grad
   merchant: {
     icon: Briefcase, label: "Merchant", tagline: "Grow. Manage. Scale.",
     gradient: "from-violet-600 via-purple-500 to-violet-400",
-    description: "List your services, manage bookings, and grow your business on fulticket."
+    description: "List your services, manage bookings, and grow your business on TodaPay."
   },
   agent: {
     icon: Plane, label: "Agent", tagline: "Book. Earn. Repeat.",
@@ -64,7 +68,7 @@ const Auth = () => {
                 <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                   <RoleIcon className="h-6 w-6" />
                 </div>
-                <span className="text-lg font-bold tracking-wide">fulticket</span>
+                <span className="text-lg font-bold tracking-wide">TodaPay</span>
               </motion.div>
             </div>
             <motion.div key={currentRole + "-text"} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>

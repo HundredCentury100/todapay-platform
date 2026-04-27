@@ -25,14 +25,14 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-3">1. Agreement to Terms</h2>
                 <p className="text-muted-foreground">
-                  By accessing or using fulticket ("the Platform"), you agree to be bound by these Terms and Conditions, governed by the laws of Zimbabwe. If you disagree with any part of these terms, you may not use our Platform.
+                  By accessing or using TodaPay ("the Platform"), you agree to be bound by these Terms and Conditions, governed by the laws of Zimbabwe. If you disagree with any part of these terms, you may not use our Platform.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-3">2. Platform Description</h2>
                 <p className="text-muted-foreground">
-                  fulticket is a multi-service digital platform operating in Zimbabwe that connects customers with transport operators (bus, ride-hailing, car rental, transfers), event organisers, accommodation providers, workspace operators, venue owners, and experience hosts. We facilitate bookings, bill payments, and digital wallet services but do not own or operate the underlying services. We also provide bill payment services for utilities (ZESA), council services (BCC), airtime, and retail accounts.
+                  TodaPay is a multi-service digital platform operating in Zimbabwe that connects customers with transport operators (bus, ride-hailing, car rental, transfers), event organisers, accommodation providers, workspace operators, venue owners, and experience hosts. We facilitate bookings, bill payments, and digital wallet services but do not own or operate the underlying services. We also provide bill payment services for utilities (ZESA), council services (BCC), airtime, and retail accounts.
                 </p>
               </section>
 
@@ -63,19 +63,19 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-3">5. Bill Payment Terms</h2>
                 <div className="space-y-3 text-muted-foreground">
-                  <p><strong>5.1</strong> Bill payments processed through fulticket (ZESA tokens, BCC rates, airtime, retail accounts) are subject to a service fee of USD $1.00 per transaction for non-airtime, non-ZESA billers.</p>
+                  <p><strong>5.1</strong> Bill payments processed through TodaPay (ZESA tokens, BCC rates, airtime, retail accounts) are subject to a service fee of USD $1.00 per transaction for non-airtime, non-ZESA billers.</p>
                   <p><strong>5.2</strong> Once a bill payment is submitted and confirmed, it cannot be reversed. Tokens and airtime are delivered immediately upon successful payment.</p>
-                  <p><strong>5.3</strong> fulticket is not responsible for incorrect account numbers or meter numbers provided by the user.</p>
+                  <p><strong>5.3</strong> TodaPay is not responsible for incorrect account numbers or meter numbers provided by the user.</p>
                 </div>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-3">6. Digital Wallet Terms</h2>
                 <div className="space-y-3 text-muted-foreground">
-                  <p><strong>6.1</strong> The fulticket Wallet is a stored-value digital wallet denominated in USD.</p>
+                  <p><strong>6.1</strong> The TodaPay Wallet is a stored-value digital wallet denominated in USD.</p>
                   <p><strong>6.2</strong> Wallet funds can be used for bookings, bill payments, and peer-to-peer transfers within the platform.</p>
                   <p><strong>6.3</strong> Wallet balances are non-interest-bearing and are not insured deposits.</p>
-                  <p><strong>6.4</strong> fulticket reserves the right to freeze wallets suspected of fraudulent activity.</p>
+                  <p><strong>6.4</strong> TodaPay reserves the right to freeze wallets suspected of fraudulent activity.</p>
                 </div>
               </section>
 
@@ -89,7 +89,7 @@ const TermsAndConditions = () => {
                     <li>Less than 6 hours: No refund</li>
                   </ul>
                   <p><strong>7.2 Operator Cancellations:</strong> If a service provider cancels, you will receive a full refund within 7-14 business days.</p>
-                  <p><strong>7.3 Refund Processing:</strong> Refunds are processed to the original payment method or fulticket Wallet within 14 business days.</p>
+                  <p><strong>7.3 Refund Processing:</strong> Refunds are processed to the original payment method or TodaPay Wallet within 14 business days.</p>
                   <p><strong>7.4 Special Circumstances:</strong> Refunds for medical emergencies or bereavement may be considered on a case-by-case basis with documentation.</p>
                 </div>
               </section>
@@ -99,7 +99,7 @@ const TermsAndConditions = () => {
                 <div className="space-y-3 text-muted-foreground">
                   <p>8.1 Ride fares are estimated at booking and may vary based on actual distance, traffic, and surge pricing.</p>
                   <p>8.2 A platform commission of 10% applies to all ride and transfer fares.</p>
-                  <p>8.3 Drivers are independent contractors and not employees of fulticket.</p>
+                  <p>8.3 Drivers are independent contractors and not employees of TodaPay.</p>
                   <p>8.4 Cancellation fees may apply for rides cancelled after driver assignment.</p>
                 </div>
               </section>
@@ -125,7 +125,7 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-3">11. Limitation of Liability</h2>
                 <div className="space-y-3 text-muted-foreground">
-                  <p>11.1 fulticket acts as an intermediary platform and is not responsible for the actions of service providers.</p>
+                  <p>11.1 TodaPay acts as an intermediary platform and is not responsible for the actions of service providers.</p>
                   <p>11.2 We are not liable for delays, cancellations, or changes made by service providers.</p>
                   <p>11.3 Our maximum liability is limited to the value of your booking or transaction.</p>
                   <p>11.4 We are not responsible for indirect or consequential losses.</p>
@@ -165,7 +165,7 @@ const TermsAndConditions = () => {
                 <h2 className="text-2xl font-semibold mb-3">15. Contact Information</h2>
                 <p className="text-muted-foreground">For questions about these terms, contact us at:</p>
                 <div className="mt-3 space-y-1 text-muted-foreground">
-                  <p><strong>Email:</strong> legal@fulticket.com</p>
+                  <p><strong>Email:</strong> legal@todapayments.com</p>
                   <p><strong>WhatsApp:</strong> +263 78 000 0000</p>
                   <p><strong>Address:</strong> Harare, Zimbabwe</p>
                 </div>

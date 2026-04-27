@@ -65,7 +65,7 @@ export const generateEnhancedPDF = async (ticketData: TicketData) => {
     pdf.rect(0, 0, pageWidth, 50, 'F');
     
     pdf.setTextColor(255, 255, 255);
-    addText('fulticket', pageWidth / 2, 20, 24, 'bold', 'center');
+    addText('TodaPay', pageWidth / 2, 20, 24, 'bold', 'center');
     addText('Premium Travel & Events Platform', pageWidth / 2, 28, 10, 'normal', 'center');
     addText(ticketData.type === 'bus' ? 'BUS TICKET' : 'EVENT TICKET', pageWidth / 2, 40, 16, 'bold', 'center');
 
@@ -269,7 +269,7 @@ export const generateEnhancedPDF = async (ticketData: TicketData) => {
     pdf.setTextColor(100, 100, 100);
     addText('⚠ Important: Arrive 30 minutes early • Keep this ticket secure • Valid ID required', margin, yPos, 8);
     yPos += 5;
-    addText('Help: fulticket.com/help • Terms: fulticket.com/terms', margin, yPos, 7);
+    addText('Help: todapayments.com/help • Terms: todapayments.com/terms', margin, yPos, 7);
     yPos += 10;
     pdf.setDrawColor(200, 200, 200);
     pdf.line(margin, yPos, pageWidth - margin, yPos);
@@ -277,7 +277,7 @@ export const generateEnhancedPDF = async (ticketData: TicketData) => {
     addText(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, yPos, 7, 'normal', 'center');
 
     // Save PDF
-    const fileName = `fulticket-${ticketData.type}-${ticketData.bookingReference}.pdf`;
+    const fileName = `TodaPay-${ticketData.type}-${ticketData.bookingReference}.pdf`;
     pdf.save(fileName);
 
     return { success: true, fileName };

@@ -107,7 +107,7 @@ export const WorldClassStayTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🏨 Hotel Booking\n${booking.item_name}\n📍 ${booking.property_city || ''}\n📅 ${formatDate(booking.check_in_date)} - ${formatDate(booking.check_out_date)}\n${nights} night${nights > 1 ? 's' : ''}\nBooking: ${booking.booking_reference}\n\nvia fulticket.com`;
+    const text = `🏨 Hotel Booking\n${booking.item_name}\n📍 ${booking.property_city || ''}\n📅 ${formatDate(booking.check_in_date)} - ${formatDate(booking.check_out_date)}\n${nights} night${nights > 1 ? 's' : ''}\nBooking: ${booking.booking_reference}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -318,7 +318,7 @@ export const WorldClassStayTicket = ({
         {/* Compact Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            ⚠️ Present valid ID at check-in • Cancellation policy applies • fulticket.com
+            ⚠️ Present valid ID at check-in • Cancellation policy applies • todapayments.com
           </p>
         </div>
       </Card>

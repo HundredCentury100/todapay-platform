@@ -170,7 +170,7 @@ const QuotesPage = () => {
           body: {
             bookingId: booking.id,
             type: 'venue_quote',
-            paymentLink: `https://fulticket.com/venues/quote/${paymentLinkCode}`,
+            paymentLink: `https://todapayments.com/venues/quote/${paymentLinkCode}`,
             customerEmail: selectedQuote.customer_email,
             customerName: selectedQuote.customer_name,
             venueName: selectedQuote.venue_name,

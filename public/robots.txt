@@ -1,14 +1,11 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# TodaPay - Zimbabwe's Super App
+# https://todapayments.com
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://todapayments.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

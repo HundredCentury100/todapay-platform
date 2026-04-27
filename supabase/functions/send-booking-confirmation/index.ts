@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay <support@notify.TodaPay.com>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -140,11 +140,11 @@ const handler = async (req: Request): Promise<Response> => {
       alertText: 'Please arrive at least 30 minutes before departure. Bring a valid ID and your booking reference.',
       alertColor: 'warning',
       ctaLabel: 'View My Orders',
-      ctaUrl: 'https://fulticket.com/orders',
+      ctaUrl: 'https://TodaPay.com/orders',
     });
 
     // Send via Lovable Email queue
-    const subject = `Booking Confirmed - ${b.itemName} | fulticket`;
+    const subject = `Booking Confirmed - ${b.itemName} | TodaPay`;
     await supabase.rpc('enqueue_email', {
       queue_name: 'transactional_emails',
       payload: { from: BRANDED_SENDER, to: [b.passengerEmail], subject, html: htmlContent },

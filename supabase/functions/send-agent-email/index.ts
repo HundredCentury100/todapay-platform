@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket Agents <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay Agents <support@notify.TodaPay.com>";
 const INTERNAL_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
 
 const corsHeaders = {
@@ -71,12 +71,12 @@ const handler = async (req: Request): Promise<Response> => {
       alertText,
       alertColor: notificationType === 'tier_upgrade' ? 'success' : undefined,
       ctaLabel: 'View Agent Dashboard',
-      ctaUrl: 'https://fulticket.com/merchant/agent/dashboard',
+      ctaUrl: 'https://TodaPay.com/merchant/agent/dashboard',
     });
 
     await supabase.rpc('enqueue_email', {
       queue_name: 'transactional_emails',
-      payload: { from: BRANDED_SENDER, to: [agentEmail], subject: `fulticket - ${title}`, html: htmlContent },
+      payload: { from: BRANDED_SENDER, to: [agentEmail], subject: `TodaPay - ${title}`, html: htmlContent },
     });
     console.log("Agent email enqueued successfully");
 

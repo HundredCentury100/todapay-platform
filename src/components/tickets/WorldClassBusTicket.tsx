@@ -67,7 +67,7 @@ export const WorldClassBusTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🚌 Bus Ticket\n${bookingData.from} → ${bookingData.to}\n${bookingData.date} at ${bookingData.departureTime}\nBooking: ${bookingReference}\n\nvia fulticket.com`;
+    const text = `🚌 Bus Ticket\n${bookingData.from} → ${bookingData.to}\n${bookingData.date} at ${bookingData.departureTime}\nBooking: ${bookingReference}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -240,7 +240,7 @@ export const WorldClassBusTicket = ({
         {/* Compact Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            ⚠️ Arrive 30 min early • Present ID at boarding • fulticket.com
+            ⚠️ Arrive 30 min early • Present ID at boarding • todapayments.com
           </p>
         </div>
       </Card>

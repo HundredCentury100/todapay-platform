@@ -109,7 +109,7 @@ export const WorldClassWorkspaceTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🏢 Workspace Booking\n${booking.item_name}\n📍 ${booking.workspace_city || ''}\n📅 ${formatDate(booking.start_datetime)}\n⏰ ${formatTime(booking.start_datetime)} - ${formatTime(booking.end_datetime)}\nBooking: ${booking.booking_reference}\n\nvia fulticket.com`;
+    const text = `🏢 Workspace Booking\n${booking.item_name}\n📍 ${booking.workspace_city || ''}\n📅 ${formatDate(booking.start_datetime)}\n⏰ ${formatTime(booking.start_datetime)} - ${formatTime(booking.end_datetime)}\nBooking: ${booking.booking_reference}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -321,7 +321,7 @@ export const WorldClassWorkspaceTicket = ({
         {/* Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            ⚠️ Arrive 5 mins early • Cancellation policy applies • fulticket.com
+            ⚠️ Arrive 5 mins early • Cancellation policy applies • todapayments.com
           </p>
         </div>
       </Card>

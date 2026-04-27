@@ -31,7 +31,7 @@ export const WalletWidget = () => {
                 <Wallet className="h-5 w-5" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-sm">FulTicket Wallet</p>
+                <p className="font-semibold text-sm">TodaPay Wallet</p>
                 <p className="text-primary-foreground/70 text-xs">Sign in to get started</p>
               </div>
               <div className="flex items-center gap-1 text-sm font-medium">

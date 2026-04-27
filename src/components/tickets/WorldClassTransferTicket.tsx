@@ -96,7 +96,7 @@ export const WorldClassTransferTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🚐 Transfer Booking\n${booking.pickup_location} → ${booking.dropoff_location}\n📅 ${formatDateTime(booking.pickup_datetime)}\n👥 ${booking.num_passengers} passenger(s)\nBooking: ${booking.booking_reference}\n\nvia fulticket.com`;
+    const text = `🚐 Transfer Booking\n${booking.pickup_location} → ${booking.dropoff_location}\n📅 ${formatDateTime(booking.pickup_datetime)}\n👥 ${booking.num_passengers} passenger(s)\nBooking: ${booking.booking_reference}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -323,7 +323,7 @@ export const WorldClassTransferTicket = ({
         {/* Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            🚐 Driver will meet you at pickup point • fulticket.com
+            🚐 Driver will meet you at pickup point • todapayments.com
           </p>
         </div>
       </Card>

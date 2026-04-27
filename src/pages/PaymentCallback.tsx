@@ -256,7 +256,7 @@ const PaymentCallback = () => {
             )}
 
             <p className="text-[10px] text-muted-foreground/60">
-              Powered by <span className="font-semibold">Suvat Pay</span> · Suvat Group
+              Powered by <span className="font-semibold">Suvat Pay</span> · Toda Technologies
             </p>
           </CardContent>
         </Card>

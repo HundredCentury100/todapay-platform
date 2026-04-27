@@ -1,13 +1,13 @@
 {
-  "name": "FulTicket - Book Bus & Event Tickets Across Africa",
-  "short_name": "FulTicket",
-  "description": "Your gateway to seamless travel and unforgettable events across Africa. Book buses, concerts, sports, and more.",
+  "name": "TodaPay - Zimbabwe's Super App for Travel & Events",
+  "short_name": "TodaPay",
+  "description": "Your gateway to seamless travel and unforgettable events in Zimbabwe. Book buses, events, stays, rides and more.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#1d9bf0",
-  "background_color": "#1d9bf0",
+  "theme_color": "#1c1fcf",
+  "background_color": "#1c1fcf",
   "categories": [
     "travel",
     "entertainment",

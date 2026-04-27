@@ -19,7 +19,7 @@ export const RideReceiptCard = ({ receipt }: RideReceiptCardProps) => {
     
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text("fulticket.com", 105, 27, { align: "center" });
+    doc.text("todapayments.com", 105, 27, { align: "center" });
     
     doc.setFontSize(12);
     doc.setTextColor(0);
@@ -104,7 +104,7 @@ export const RideReceiptCard = ({ receipt }: RideReceiptCardProps) => {
     // Footer
     doc.setFontSize(9);
     doc.setTextColor(150);
-    doc.text("Thank you for riding with us! • fulticket.com", 105, 280, { align: "center" });
+    doc.text("Thank you for riding with us! • todapayments.com", 105, 280, { align: "center" });
     
     // Save
     doc.save(`ride-receipt-${receipt.receipt_number}.pdf`);

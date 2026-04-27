@@ -55,7 +55,7 @@ export const SignInForm = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          Sign in to your fulticket account
+          Sign in to your TodaPay account
         </motion.p>
       </div>
 

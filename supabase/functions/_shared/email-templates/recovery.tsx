@@ -27,7 +27,7 @@ export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps)
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logo}>🎫 fulticket</Text>
+          <Text style={logo}>🎫 TodaPay</Text>
         </Section>
         <Section style={content}>
           <Heading style={h1}>Reset your password</Heading>
@@ -42,8 +42,8 @@ export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps)
           </Text>
         </Section>
         <Section style={footerSection}>
-          <Text style={footerBrand}>Need help? <Link href="mailto:support@fulticket.com" style={link}>support@fulticket.com</Link></Text>
-          <Text style={copyright}>© 2026 Suvat Group · fulticket</Text>
+          <Text style={footerBrand}>Need help? <Link href="mailto:support@TodaPay.com" style={link}>support@TodaPay.com</Link></Text>
+          <Text style={copyright}>© 2026 Suvat Group · TodaPay</Text>
         </Section>
       </Container>
     </Body>

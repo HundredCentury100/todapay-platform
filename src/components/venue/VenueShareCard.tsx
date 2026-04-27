@@ -41,7 +41,7 @@ const VenueShareCard = ({
   };
 
   const shareWhatsApp = () => {
-    const text = `🏛️ Check out ${name} in ${city}!\n\n📍 ${city}, ${country}\n👥 Up to ${capacity} guests\n${hourlyRate ? `💰 From $${hourlyRate}/hr` : ""}\n\nBook now on FulTicket!`;
+    const text = `🏛️ Check out ${name} in ${city}!\n\n📍 ${city}, ${country}\n👥 Up to ${capacity} guests\n${hourlyRate ? `💰 From $${hourlyRate}/hr` : ""}\n\nBook now on TodaPay!`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -85,7 +85,7 @@ const VenueShareCard = ({
             {hourlyRate && (
               <p className="text-lg font-bold text-primary">${hourlyRate.toLocaleString()}/hr</p>
             )}
-            <p className="text-[10px] text-muted-foreground/60 pt-1">Powered by FulTicket</p>
+            <p className="text-[10px] text-muted-foreground/60 pt-1">Powered by TodaPay</p>
           </div>
         </div>
 

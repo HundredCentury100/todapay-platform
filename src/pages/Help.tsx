@@ -209,7 +209,7 @@ const Help = () => {
                 </Card>
               </a>
 
-              <a href="mailto:support@fulticket.com">
+              <a href="mailto:support@todapayments.com">
                 <Card className="p-4 rounded-2xl border-0 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
                   <div className="flex items-center gap-4">
                     <div className="h-14 w-14 rounded-2xl bg-violet-500/10 flex items-center justify-center">
@@ -217,7 +217,7 @@ const Help = () => {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold">Email Support</p>
-                      <p className="text-sm text-muted-foreground">support@fulticket.com</p>
+                      <p className="text-sm text-muted-foreground">support@todapayments.com</p>
                     </div>
                     <Badge variant="outline">24h response</Badge>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />

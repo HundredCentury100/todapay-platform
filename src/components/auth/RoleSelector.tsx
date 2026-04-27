@@ -10,10 +10,14 @@ interface RoleSelectorProps {
   compact?: boolean;
 }
 
+const TodaPayLogoIcon = ({ className }: { className?: string }) => (
+  <img src="/logoTodaPay.png" alt="TodaPay" className={className} />
+);
+
 const roles = [
   {
     id: "consumer" as UserType,
-    icon: Ticket,
+    icon: TodaPayLogoIcon,
     title: "Traveler",
     description: "Book buses, events, stays & rides",
     gradient: "from-blue-500 to-cyan-400",
@@ -105,7 +109,7 @@ export const RoleSelector = ({ selectedRole, onSelectRole, compact }: RoleSelect
   return (
     <div className="space-y-4">
       <div className="text-center mb-6">
-        <h2 className="text-xl font-bold">How will you use fulticket?</h2>
+        <h2 className="text-xl font-bold">How will you use TodaPay?</h2>
         <p className="text-muted-foreground text-sm mt-1">
           Choose your primary use case
         </p>

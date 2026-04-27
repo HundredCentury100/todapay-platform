@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.80.0";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay <support@notify.TodaPay.com>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
           await fetch("https://api.sendai.co.zw/api/v1/sms/send", {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${sendaiApiKey}` },
-            body: JSON.stringify({ sender_id: "fulticket", to: phone, message: `FulTicket Wallet: $${formattedAmount} ${verb} your wallet. ${description || ""}`.trim() }),
+            body: JSON.stringify({ sender_id: "TodaPay", to: phone, message: `FulTicket Wallet: $${formattedAmount} ${verb} your wallet. ${description || ""}`.trim() }),
           });
           await supabase.from("sms_logs").insert({
             phone_number: phone, message_type: "wallet_notification", status: "sent", provider: "sendai",
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
           totalValue: `${isCredit ? '+' : '-'}$${formattedAmount}`,
           totalBadge: 'COMPLETED',
           ctaLabel: 'View Wallet',
-          ctaUrl: 'https://fulticket.com/wallet',
+          ctaUrl: 'https://TodaPay.com/wallet',
         });
 
         await supabase.rpc('enqueue_email', {

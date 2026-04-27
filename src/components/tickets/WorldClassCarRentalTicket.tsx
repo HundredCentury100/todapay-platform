@@ -103,7 +103,7 @@ export const WorldClassCarRentalTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🚗 Car Rental\n${booking.vehicle_name}\n📍 Pickup: ${booking.pickup_location}\n📅 ${formatDateTime(booking.pickup_datetime)} - ${formatDateTime(booking.dropoff_datetime)}\n${rentalDays} day${rentalDays > 1 ? 's' : ''}\nBooking: ${booking.booking_reference}\n\nvia fulticket.com`;
+    const text = `🚗 Car Rental\n${booking.vehicle_name}\n📍 Pickup: ${booking.pickup_location}\n📅 ${formatDateTime(booking.pickup_datetime)} - ${formatDateTime(booking.dropoff_datetime)}\n${rentalDays} day${rentalDays > 1 ? 's' : ''}\nBooking: ${booking.booking_reference}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -355,7 +355,7 @@ export const WorldClassCarRentalTicket = ({
         {/* Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            🚗 Bring ID + driver's license • Full-to-full fuel policy • fulticket.com
+            🚗 Bring ID + driver's license • Full-to-full fuel policy • todapayments.com
           </p>
         </div>
       </Card>

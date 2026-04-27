@@ -21,15 +21,15 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="hidden md:block border-t border-border/50 bg-secondary/30 mt-auto">
+    <footer className="hidden md:block border-t border-border bg-background mt-auto">
       <div className="container-wide section-padding-sm">
         {/* Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1 space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <Ticket className="h-5 w-5 text-primary" />
-              <span className="text-lg font-semibold tracking-tight">fulticket</span>
+              <img src="/logoTodaPay.png" alt="TodaPay" className="h-5 w-5" />
+              <span className="text-lg font-semibold tracking-tight">TodaPay</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Your global super app for travel, events, and spaces. Book anywhere, anytime.
@@ -75,11 +75,11 @@ const Footer = () => {
             <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">contact</h3>
             <ul className="space-y-3">
               <li>
-                <a 
-                  href="mailto:support@fulticket.com" 
+                <a
+                  href="mailto:support@todapayments.com"
                   className="text-sm text-foreground/80 hover:text-foreground transition-colors"
                 >
-                  support@fulticket.com
+                  support@todapayments.com
                 </a>
               </li>
               <li>
@@ -99,15 +99,10 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © {currentYear} fulticket from{" "}
-            <a 
-              href="https://www.suvat.group" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-foreground/80 hover:text-foreground transition-colors underline-offset-2 hover:underline"
-            >
-              Suvat Group
-            </a>
+            © {currentYear} TodaPay from{" "}
+            <span className="text-foreground/80">
+              Toda Technologies
+            </span>
           </p>
           <p className="text-xs text-muted-foreground">
             available worldwide 🌍

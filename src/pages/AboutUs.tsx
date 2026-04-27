@@ -50,7 +50,7 @@ const AboutUs = () => {
           <div className="px-4 py-3 flex items-center gap-3">
             <BackButton fallbackPath="/" />
             <div className="flex-1">
-              <h1 className="font-bold text-lg">About FulTicket</h1>
+              <h1 className="font-bold text-lg">About TodaPay</h1>
               <p className="text-xs text-muted-foreground">Zimbabwe's Super App</p>
             </div>
           </div>
@@ -87,7 +87,7 @@ const AboutUs = () => {
               <h2 className="text-lg font-bold">Our Mission</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              FulTicket is revolutionizing travel and event booking in Zimbabwe, making experiences 
+              TodaPay is revolutionizing travel and event booking in Zimbabwe, making experiences
               accessible, affordable, and delightful for every Zimbabwean.
             </p>
           </Card>
@@ -202,8 +202,8 @@ const AboutUs = () => {
                 </div>
                 <div>
                   <p className="font-medium text-sm">Email</p>
-                  <a href="mailto:support@fulticket.com" className="text-xs text-primary hover:underline">
-                    support@fulticket.com
+                  <a href="mailto:support@todapayments.com" className="text-xs text-primary hover:underline">
+                    support@todapayments.com
                   </a>
                 </div>
               </div>

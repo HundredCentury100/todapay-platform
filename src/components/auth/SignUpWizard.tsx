@@ -99,7 +99,7 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
         await supabase.from("merchant_profiles").insert({
           user_id: userId,
           business_name: roleDetails.businessName || "My Business",
-          business_email: formData.email || "pending@fulticket.com",
+          business_email: formData.email || "pending@todapayments.com",
           role: (roleDetails.merchantRole || "bus_operator") as any,
           business_address: roleDetails.businessAddress || "",
           verification_status: "pending",
@@ -112,7 +112,7 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
         await supabase.from("merchant_profiles").insert({
           user_id: userId,
           business_name: roleDetails.agencyName || "My Agency",
-          business_email: formData.email || "pending@fulticket.com",
+          business_email: formData.email || "pending@todapayments.com",
           role: (roleDetails.agentType || "travel_agent") as any,
           agent_license_number: roleDetails.licenseNumber || null,
           verification_status: "pending",

@@ -123,7 +123,7 @@ export const generateBillReceiptPDF = async (data: BillReceiptData): Promise<jsP
   pdf.setTextColor(130);
   text('Powered by Suvat Pay', pageWidth / 2, y, 6, 'normal', 'center');
   y += 3;
-  text('Suvat Group · suvat.co.zw', pageWidth / 2, y, 5, 'normal', 'center');
+  text('Toda Technologies · todapayments.com', pageWidth / 2, y, 5, 'normal', 'center');
   y += 4;
   text('Thank you for your payment', pageWidth / 2, y, 5, 'normal', 'center');
 

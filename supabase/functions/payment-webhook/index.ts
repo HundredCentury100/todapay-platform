@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay <support@notify.TodaPay.com>";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -75,14 +75,14 @@ serve(async (req) => {
               { label: 'Payment Ref', value: transactionRef || 'N/A' },
             ],
             totalLabel: 'Amount Paid', totalValue: `$${booking.total_price.toFixed(2)}`, totalBadge: 'PAID',
-            ctaLabel: 'View Booking', ctaUrl: 'https://fulticket.com/orders',
+            ctaLabel: 'View Booking', ctaUrl: 'https://TodaPay.com/orders',
           });
 
           await supabase.rpc('enqueue_email', {
             queue_name: 'transactional_emails',
             payload: {
               from: BRANDED_SENDER, to: [booking.passenger_email],
-              subject: `Payment Confirmed - ${booking.booking_reference} | fulticket`,
+              subject: `Payment Confirmed - ${booking.booking_reference} | TodaPay`,
               html: paymentHtml,
             },
           });
@@ -98,7 +98,7 @@ serve(async (req) => {
               headers: { "Content-Type": "application/json", Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
               body: JSON.stringify({
                 action: "send", to: booking.passenger_phone,
-                message: `Payment confirmed! Ref: ${booking.booking_reference}. Amount: $${booking.total_price.toFixed(2)}. ${booking.item_name}. Thank you for using fulticket!`.slice(0, 160),
+                message: `Payment confirmed! Ref: ${booking.booking_reference}. Amount: $${booking.total_price.toFixed(2)}. ${booking.item_name}. Thank you for using TodaPay!`.slice(0, 160),
                 context: "payment_confirmed", reference_id: booking.booking_reference, user_id: booking.user_id,
               }),
             });

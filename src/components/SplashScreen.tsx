@@ -252,9 +252,9 @@ const SplashScreen = ({ onComplete, minDisplayTime = 2500 }: SplashScreenProps) 
               Your all-in-one travel & lifestyle platform
             </motion.p>
 
-            {/* From Suvat Group branding */}
+            {/* From Toda Technologies branding */}
             <motion.a
-              href="https://www.suvat.group"
+              href="https://todatech.co.zw"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 text-sm text-white/60 hover:text-white/90 transition-colors"
@@ -262,7 +262,7 @@ const SplashScreen = ({ onComplete, minDisplayTime = 2500 }: SplashScreenProps) 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.8, duration: 0.5 }}
             >
-              from <span className="font-semibold">Suvat Group</span>
+              from <span className="font-semibold">Toda Technologies</span>
             </motion.a>
 
             {/* Loading indicator */}

@@ -96,7 +96,7 @@ const InstallApp = () => {
           </motion.div>
           <h1 className="text-2xl font-bold mb-2">Already Installed!</h1>
           <p className="text-muted-foreground mb-6">
-            FulTicket is installed on your device. You can find it on your home screen.
+            TodaPay is installed on your device. You can find it on your home screen.
           </p>
           <Link to="/">
             <Button className="gap-2">
@@ -130,9 +130,9 @@ const InstallApp = () => {
             <div className="h-24 w-24 rounded-3xl bg-primary mx-auto flex items-center justify-center mb-6 shadow-glow">
               <span className="text-primary-foreground font-black text-4xl">F</span>
             </div>
-            <h1 className="text-2xl font-bold mb-2">Install FulTicket</h1>
+            <h1 className="text-2xl font-bold mb-2">Install TodaPay</h1>
             <p className="text-muted-foreground">
-              Add FulTicket to your home screen for the best experience
+              Add TodaPay to your home screen for the best experience
             </p>
           </motion.div>
 

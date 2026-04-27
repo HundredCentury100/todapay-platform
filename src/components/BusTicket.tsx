@@ -110,12 +110,12 @@ const BusTicket = ({ bookingData, ticketNumber, reservationType, reservationExpi
         </div>
         <p className="text-xs sm:text-sm opacity-90">Your Journey, Our Priority</p>
         <a 
-          href="https://www.fulticket.com" 
+          href="https://www.todapayments.com" 
           target="_blank" 
           rel="noopener noreferrer"
           className="text-xs sm:text-sm opacity-90 hover:opacity-100 transition-opacity inline-block mt-1"
         >
-          www.fulticket.com
+          www.todapayments.com
         </a>
       </div>
 

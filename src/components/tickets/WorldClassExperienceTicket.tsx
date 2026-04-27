@@ -81,7 +81,7 @@ export const WorldClassExperienceTicket = ({
   };
 
   const handleShare = async () => {
-    const text = `🌟 Experience Booking\n${booking.item_name}\n📍 ${booking.location_city || ''}\n📅 ${formatDate(booking.experience_date)} at ${booking.start_time}\n👥 ${booking.num_participants} participant(s)\nBooking: ${booking.booking_reference}\n\nvia fulticket.com`;
+    const text = `🌟 Experience Booking\n${booking.item_name}\n📍 ${booking.location_city || ''}\n📅 ${formatDate(booking.experience_date)} at ${booking.start_time}\n👥 ${booking.num_participants} participant(s)\nBooking: ${booking.booking_reference}\n\nvia todapayments.com`;
 
     if (navigator.share) {
       try {
@@ -295,7 +295,7 @@ export const WorldClassExperienceTicket = ({
         {/* Footer */}
         <div className="bg-muted/30 px-4 py-2 border-t">
           <p className="text-[9px] text-muted-foreground text-center">
-            ⏰ Arrive 15 min early • Comfortable shoes recommended • fulticket.com
+            ⏰ Arrive 15 min early • Comfortable shoes recommended • todapayments.com
           </p>
         </div>
       </Card>

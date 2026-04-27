@@ -97,30 +97,32 @@ input, textarea, select, button {
     --popover: 0 0% 100%;
     --popover-foreground: 230 20% 10%;
 
-    /* Vibrant Blue - Primary (#5271ff) */
-    --primary: 229 100% 66%;
+    /* TodaPay Deep Blue - Primary (#1c1fcf) */
+    --primary: 239 76% 46%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 229 100% 76%;
-    --primary-dark: 229 100% 56%;
+    --primary-glow: 237 93% 63%;
+    --primary-dark: 239 76% 36%;
 
-    --secondary: 230 15% 95%;
-    --secondary-foreground: 230 20% 10%;
+    /* TodaPay Yellow - Secondary (#ffc50d) */
+    --secondary: 46 100% 52%;
+    --secondary-foreground: 0 0% 10%;
 
     --muted: 230 10% 94%;
     --muted-foreground: 230 10% 45%;
 
-    --accent: 229 100% 95%;
-    --accent-foreground: 229 100% 45%;
+    /* TodaPay Yellow Accent */
+    --accent: 46 100% 95%;
+    --accent-foreground: 46 100% 35%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 230 15% 90%;
     --input: 230 15% 92%;
-    --ring: 229 100% 66%;
+    --ring: 239 76% 46%;
 
-    /* Service colors - Vibrant blue primary */
-    --rides: 229 100% 66%;
+    /* Service colors - TodaPay blue primary */
+    --rides: 239 76% 46%;
     --food: 0 84% 55%;
     --express: 180 70% 45%;
     --stays: 25 95% 50%;
@@ -142,29 +144,32 @@ input, textarea, select, button {
     --popover: 240 25% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 229 100% 70%;
+    /* TodaPay colors - dark mode */
+    --primary: 239 76% 56%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 229 100% 80%;
-    --primary-dark: 229 100% 60%;
+    --primary-glow: 237 93% 73%;
+    --primary-dark: 239 76% 46%;
 
-    --secondary: 230 15% 16%;
-    --secondary-foreground: 0 0% 95%;
+    /* Yellow secondary in dark mode */
+    --secondary: 46 100% 52%;
+    --secondary-foreground: 0 0% 10%;
 
     --muted: 230 12% 18%;
     --muted-foreground: 230 8% 65%;
 
-    --accent: 229 40% 18%;
-    --accent-foreground: 229 100% 80%;
+    /* Yellow accent in dark mode */
+    --accent: 46 100% 20%;
+    --accent-foreground: 46 100% 70%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 230 12% 22%;
     --input: 230 12% 20%;
-    --ring: 229 100% 70%;
+    --ring: 239 76% 56%;
 
     /* Service colors - slightly brighter for dark mode */
-    --rides: 229 100% 70%;
+    --rides: 239 76% 56%;
     --food: 0 84% 60%;
     --express: 180 70% 50%;
     --stays: 25 95% 55%;

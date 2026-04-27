@@ -115,7 +115,7 @@ const EventShareCard = ({ event }: EventShareCardProps) => {
                 </div>
               </div>
               <div className="pt-3 border-t border-primary-foreground/20">
-                <p className="text-[10px] uppercase tracking-wider opacity-60">Powered by FulTicket</p>
+                <p className="text-[10px] uppercase tracking-wider opacity-60">Powered by TodaPay</p>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay <support@notify.TodaPay.com>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,8 +60,8 @@ function buildNotificationEmail(notificationType: NotificationType, title: strin
     greeting: body,
     details: details.length > 0 ? details : undefined,
     customHtml: customHtml || undefined,
-    ctaLabel: 'Open fulticket',
-    ctaUrl: 'https://fulticket.com',
+    ctaLabel: 'Open TodaPay',
+    ctaUrl: 'https://TodaPay.com',
   });
 }
 
@@ -112,7 +112,7 @@ serve(async (req: Request) => {
           payload: {
             from: BRANDED_SENDER,
             to: [recipientEmail],
-            subject: `${title} | fulticket`,
+            subject: `${title} | TodaPay`,
             html: htmlContent,
           },
         });

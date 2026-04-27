@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildPremiumEmail } from "../_shared/email-template.ts";
 
-const BRANDED_SENDER = "fulticket <support@notify.fulticket.com>";
+const BRANDED_SENDER = "TodaPay <support@notify.TodaPay.com>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -67,7 +67,7 @@ serve(async (req) => {
       totalValue: `$${receipt.total_amount.toFixed(2)}`,
       totalBadge: receipt.payment_status === 'paid' ? 'PAID' : 'PENDING',
       ctaLabel: 'View Ride History',
-      ctaUrl: 'https://fulticket.com/rides/history',
+      ctaUrl: 'https://TodaPay.com/rides/history',
     });
 
     await supabase.rpc('enqueue_email', {

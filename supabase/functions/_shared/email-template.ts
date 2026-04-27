@@ -151,7 +151,7 @@ export function buildPremiumEmail(opts: PremiumEmailOptions): string {
           <!-- Brand Header -->
           <tr>
             <td style="background:#5271ff;padding:28px 32px;text-align:center;">
-              <div style="font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">🎫 fulticket</div>
+              <div style="font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">🎫 TodaPay</div>
               <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:6px;letter-spacing:0.5px;">${emoji} ${typeLabel}</div>
             </td>
           </tr>
@@ -181,11 +181,11 @@ export function buildPremiumEmail(opts: PremiumEmailOptions): string {
             <td style="background:#fafbfc;padding:24px 32px;text-align:center;border-top:1px solid #eee;">
               ${opts.footerNote ? `<p style="color:#888;font-size:13px;margin:0 0 12px;">${opts.footerNote}</p>` : ''}
               <p style="margin:0;color:#888;font-size:13px;">
-                Need help? <a href="mailto:support@fulticket.com" style="color:#5271ff;text-decoration:none;">support@fulticket.com</a>
+                Need help? <a href="mailto:support@TodaPay.com" style="color:#5271ff;text-decoration:none;">support@TodaPay.com</a>
                 <br/>or call +263 789 583 003
               </p>
               <p style="margin:16px 0 0;color:#bbb;font-size:11px;">
-                © 2026 Suvat Group · <a href="https://fulticket.com" style="color:#bbb;text-decoration:none;">fulticket.com</a>
+                © 2026 Suvat Group · <a href="https://TodaPay.com" style="color:#bbb;text-decoration:none;">TodaPay.com</a>
               </p>
             </td>
           </tr>

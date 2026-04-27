@@ -262,7 +262,7 @@ export function SuvatPayCheckout({
           </div>
 
           <p className="text-center text-[10px] text-muted-foreground/60">
-            Powered by <span className="font-semibold text-muted-foreground/80">Suvat Pay</span> · Suvat Group
+            Powered by <span className="font-semibold text-muted-foreground/80">Suvat Pay</span> · Toda Technologies
           </p>
         </CardContent>
       </Card>
