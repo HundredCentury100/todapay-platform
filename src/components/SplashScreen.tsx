@@ -144,70 +144,19 @@ const SplashScreen = ({ onComplete, minDisplayTime = 2500 }: SplashScreenProps) 
                   }}
                 />
                 
-                {/* Logo icon - Ticket */}
+                {/* TodaPay Logo */}
                 <motion.div
-                  className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/10 border border-white/30 flex items-center justify-center shadow-2xl"
+                  className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/10 border border-white/30 flex items-center justify-center shadow-2xl p-4"
                   whileHover={{ scale: 1.05 }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
                 >
-                  <svg
-                    viewBox="0 0 100 100"
-                    className="w-16 h-16 md:w-20 md:h-20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <motion.path
-                      d="M15 25 L85 25 L85 40 C80 40 75 45 75 50 C75 55 80 60 85 60 L85 75 L15 75 L15 60 C20 60 25 55 25 50 C25 45 20 40 15 40 Z"
-                      fill="white"
-                      initial={{ pathLength: 0, opacity: 0 }}
-                      animate={{ pathLength: 1, opacity: 1 }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                    />
-                    <motion.line
-                      x1="35" y1="35" x2="65" y2="35"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.5, delay: 1 }}
-                    />
-                    <motion.line
-                      x1="35" y1="45" x2="55" y2="45"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.5, delay: 1.2 }}
-                    />
-                    <motion.line
-                      x1="35" y1="55" x2="60" y2="55"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.5, delay: 1.4 }}
-                    />
-                    <motion.circle
-                      cx="70" cy="60"
-                      r="8"
-                      fill="hsl(var(--primary))"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ duration: 0.3, delay: 1.5 }}
-                    />
-                    <motion.path
-                      d="M67 60 L69 62 L73 58"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.3, delay: 1.7 }}
-                    />
-                  </svg>
+                  <img
+                    src="/logoTodaPay.png"
+                    alt="TodaPay"
+                    className="w-full h-full object-contain"
+                  />
                 </motion.div>
               </div>
             </motion.div>
