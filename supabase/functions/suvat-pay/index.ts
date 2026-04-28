@@ -16,6 +16,7 @@ async function pesepayRequest(path: string, method: string, body?: string, authK
   const hostname = PESEPAY_HOST;
   const port = 443;
   const fullPath = `${PESEPAY_BASE_PATH}${path}`;
+  console.log(`Pesepay request -> https://${hostname}${fullPath} (env=${PESEPAY_ENV})`);
 
   // Build raw HTTP request
   const contentLength = body ? new TextEncoder().encode(body).length : 0;
