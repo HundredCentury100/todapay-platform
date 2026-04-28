@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 interface TodaPayCheckoutProps {
   amount: number;
@@ -82,11 +83,8 @@ export function TodaPayCheckout({
       const finalMerchantReference = prepared.merchantReference || merchantReference || finalBookingId;
       const finalCustomer = prepared.customer || customer;
 
-      // Use proper deep link for mobile apps, web URL for browser
-      const isNative = Capacitor.isNativePlatform();
-      const returnUrl = isNative
-        ? `todapay://payment/callback`
-        : `${window.location.origin}/payment/callback`;
+      // Use HTTPS URLs for both web and mobile (Pesepay doesn't support custom schemes)
+      const returnUrl = `${window.location.origin}/payment/callback`;
       const resultUrl = `${window.location.origin}/payment/result`;
 
       const { data, error: fnError } = await supabase.functions.invoke('suvat-pay', {
@@ -130,8 +128,28 @@ export function TodaPayCheckout({
         console.log('🔗 Redirect URL:', data.redirectUrl);
         console.log('📌 Reference:', data.referenceNumber);
 
-        // Redirect to payment page
-        window.location.href = data.redirectUrl;
+        const isNative = Capacitor.isNativePlatform();
+
+        if (isNative) {
+          // Open payment in in-app browser on mobile
+          console.log('📱 Opening payment in in-app browser...');
+
+          await Browser.open({
+            url: data.redirectUrl,
+            presentationStyle: 'popover',
+            toolbarColor: '#1c1fcf',
+          });
+
+          // Listen for browser close
+          Browser.addListener('browserFinished', () => {
+            console.log('🔙 Browser closed, navigating to payment callback...');
+            // Navigate to callback page to check payment status
+            window.location.href = '/payment/callback';
+          });
+        } else {
+          // Redirect to payment page in web browser
+          window.location.href = data.redirectUrl;
+        }
       } else {
         throw new Error('No redirect URL received');
       }
