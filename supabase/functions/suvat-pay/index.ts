@@ -332,7 +332,10 @@ function decryptPayload(data: string, key: string): string {
   const encryptedPayload = data.trim();
   const keyBytes = CryptoJS.enc.Utf8.parse(key);
   const ivBytes = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
-  const decryptedBytes = CryptoJS.AES.decrypt(encryptedPayload, keyBytes, {
+  const cipherParams = CryptoJS.lib.CipherParams.create({
+    ciphertext: CryptoJS.enc.Base64.parse(encryptedPayload),
+  });
+  const decryptedBytes = CryptoJS.AES.decrypt(cipherParams, keyBytes, {
     iv: ivBytes,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
