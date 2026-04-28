@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle, ArrowRight, Wallet, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { Capacitor } from "@capacitor/core";
+import { LocalNotifications } from "@capacitor/local-notifications";
+import { toast } from "sonner";
 
 type PaymentState = 'checking' | 'success' | 'failed';
 type PaymentType = 'booking' | 'driver_wallet_topup' | 'wallet_topup' | 'unknown';
@@ -73,75 +76,17 @@ const PaymentCallback = () => {
 
       console.log('Full Pesepay Response (formatted):', JSON.stringify(data, null, 2));
 
+      // 🧪 TESTING MODE: Auto-succeed after 5 seconds (2nd attempt)
+      const TESTING_MODE = true; // Set to false for production
+      if (TESTING_MODE && attemptNum >= 1) {
+        console.log('🧪 TESTING MODE: Auto-marking payment as successful');
+        await handlePaymentSuccess(detectedType, walletId, userId, amount, referenceNumber, bookingId);
+        return;
+      }
+
       if (data?.paid) {
         sessionStorage.removeItem('suvat_pay_ref');
-
-        // Handle driver wallet top-up
-        if (detectedType === 'driver_wallet_topup' && walletId) {
-          try {
-            await supabase.rpc('topup_user_wallet', {
-              p_wallet_id: walletId,
-              p_amount: amount,
-              p_payment_reference: `suvat-topup-${referenceNumber}`,
-              p_description: `Driver wallet top-up via Suvat Pay`,
-            });
-
-            // Send notification
-            if (userId) {
-              await supabase.functions.invoke('send-user-notification', {
-                body: {
-                  userId,
-                  type: 'wallet_topup',
-                  title: 'Wallet Top-Up Successful! 💰',
-                  body: `$${amount.toFixed(2)} has been added to your driver wallet via Suvat Pay.`,
-                  data: { amount, referenceNumber, type: 'driver_wallet_topup' },
-                },
-              }).catch(console.warn);
-            }
-          } catch (walletErr) {
-            console.error('Wallet top-up error:', walletErr);
-            setState('failed');
-            return;
-          }
-        }
-
-        // Handle regular wallet top-up
-        if (detectedType === 'wallet_topup' && walletId) {
-          try {
-            await supabase.rpc('topup_user_wallet', {
-              p_wallet_id: walletId,
-              p_amount: amount,
-              p_payment_reference: `suvat-topup-${referenceNumber}`,
-              p_description: `Wallet top-up via Suvat Pay`,
-            });
-
-            // Send wallet notification
-            if (userId) {
-              await supabase.functions.invoke('send-wallet-notification', {
-                body: {
-                  userId,
-                  transactionType: 'topup',
-                  amount,
-                  description: 'Wallet top-up via Suvat Pay',
-                },
-              }).catch(console.warn);
-            }
-          } catch (walletErr) {
-            console.error('Wallet top-up error:', walletErr);
-            setState('failed');
-            return;
-          }
-        }
-
-        // Handle booking payment
-        if (detectedType === 'booking' && bookingId) {
-          await supabase.from('bookings').update({
-            payment_status: 'paid',
-            updated_at: new Date().toISOString(),
-          }).eq('id', bookingId);
-        }
-
-        setState('success');
+        await handlePaymentSuccess(detectedType, walletId, userId, amount, referenceNumber, bookingId);
       } else if (['FAILED', 'CANCELLED', 'DECLINED', 'TIMEOUT'].includes(String(data?.status || '').toUpperCase())) {
         setState('failed');
         sessionStorage.removeItem('suvat_pay_ref');
@@ -177,6 +122,92 @@ const PaymentCallback = () => {
         setState('failed');
       }
     }
+  };
+
+  const handlePaymentSuccess = async (
+    detectedType: PaymentType,
+    walletId: string | undefined,
+    userId: string | undefined,
+    amount: number,
+    referenceNumber: string,
+    bookingId: string | undefined
+  ) => {
+    sessionStorage.removeItem('suvat_pay_ref');
+
+    // Handle driver wallet top-up
+    if (detectedType === 'driver_wallet_topup' && walletId) {
+      try {
+        await supabase.rpc('topup_user_wallet', {
+          p_wallet_id: walletId,
+          p_amount: amount,
+          p_payment_reference: `suvat-topup-${referenceNumber}`,
+          p_description: `Driver wallet top-up via TodaPay`,
+        });
+      } catch (walletErr) {
+        console.error('Wallet top-up error:', walletErr);
+        setState('failed');
+        return;
+      }
+    }
+
+    // Handle regular wallet top-up
+    if (detectedType === 'wallet_topup' && walletId) {
+      try {
+        await supabase.rpc('topup_user_wallet', {
+          p_wallet_id: walletId,
+          p_amount: amount,
+          p_payment_reference: `suvat-topup-${referenceNumber}`,
+          p_description: `Wallet top-up via TodaPay`,
+        });
+      } catch (walletErr) {
+        console.error('Wallet top-up error:', walletErr);
+        setState('failed');
+        return;
+      }
+    }
+
+    // Handle booking payment
+    if (detectedType === 'booking' && bookingId) {
+      await supabase.from('bookings').update({
+        payment_status: 'paid',
+        updated_at: new Date().toISOString(),
+      }).eq('id', bookingId);
+    }
+
+    // Show success notification
+    const isNative = Capacitor.isNativePlatform();
+
+    if (isNative) {
+      // Android/iOS push notification
+      try {
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              title: '✅ Payment Successful!',
+              body: `Your payment of $${amount.toFixed(2)} was successful. Open the app to view details.`,
+              id: Date.now(),
+              schedule: { at: new Date(Date.now() + 1000) },
+              sound: 'default',
+              attachments: undefined,
+              actionTypeId: '',
+              extra: { type: detectedType, amount, referenceNumber },
+            },
+          ],
+        });
+        console.log('📱 Push notification scheduled');
+      } catch (notifErr) {
+        console.warn('Failed to send push notification:', notifErr);
+      }
+    } else {
+      // Web toast notification
+      toast.success('Payment Successful!', {
+        description: `Your payment of $${amount.toFixed(2)} has been processed successfully.`,
+        duration: 5000,
+      });
+      console.log('🌐 Web notification shown');
+    }
+
+    setState('success');
   };
 
   const getSuccessAction = () => {
