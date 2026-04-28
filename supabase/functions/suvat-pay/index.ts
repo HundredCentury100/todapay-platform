@@ -238,9 +238,12 @@ serve(async (req) => {
         }
 
         const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+        console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
+
         await syncPaymentStatus(supabase, data);
 
         const isPaid = isPaidStatus(data.transactionStatus);
+        console.log('Payment isPaid check:', { status: data.transactionStatus, isPaid });
 
         return new Response(JSON.stringify({
           success: true,
@@ -329,7 +332,9 @@ async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: st
 }
 
 function isPaidStatus(status: unknown): boolean {
-  return ['SUCCESS', 'PAID', 'COMPLETED', 'COMPLETE'].includes(String(status || '').toUpperCase());
+  const statusUpper = String(status || '').toUpperCase();
+  // Pesepay sandbox sometimes returns different statuses
+  return ['SUCCESS', 'PAID', 'COMPLETED', 'COMPLETE', 'SUCCESSFUL', 'APPROVED', 'ACCEPTED'].includes(statusUpper);
 }
 
 function isFailedStatus(status: unknown): boolean {

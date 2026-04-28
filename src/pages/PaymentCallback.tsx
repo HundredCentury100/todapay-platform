@@ -49,6 +49,14 @@ const PaymentCallback = () => {
 
       if (error) throw error;
 
+      console.log('Payment callback status check:', {
+        attempt: attemptNum,
+        referenceNumber,
+        status: data?.status,
+        paid: data?.paid,
+        rawData: JSON.stringify(data).substring(0, 300)
+      });
+
       if (data?.paid) {
         sessionStorage.removeItem('suvat_pay_ref');
 
@@ -163,7 +171,7 @@ const PaymentCallback = () => {
           <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-6 text-center text-primary-foreground">
             <div className="flex items-center justify-center gap-2 mb-2">
               <BrandLogo size="xs" variant="white" />
-              <h3 className="font-bold text-sm tracking-wide">SUVAT PAY</h3>
+              <h3 className="font-bold text-sm tracking-wide">TODAPAY</h3>
             </div>
           </div>
 
@@ -255,7 +263,7 @@ const PaymentCallback = () => {
             )}
 
             <p className="text-[10px] text-muted-foreground/60">
-              Powered by <span className="font-semibold">Suvat Pay</span> · Toda Technologies
+              Powered by <span className="font-semibold">TodaPay</span> · Toda Technologies
             </p>
           </CardContent>
         </Card>

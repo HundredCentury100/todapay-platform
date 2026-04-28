@@ -12,6 +12,13 @@ const config: CapacitorConfig = {
     // url: 'http://localhost:8081',
     // cleartext: true,
   },
+  // Deep link configuration for payment callbacks
+  android: {
+    allowMixedContent: true,
+  },
+  ios: {
+    scheme: 'todapay',
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,

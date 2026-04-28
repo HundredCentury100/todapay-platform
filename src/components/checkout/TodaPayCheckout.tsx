@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { Capacitor } from "@capacitor/core";
 
 interface TodaPayCheckoutProps {
   amount: number;
@@ -80,7 +81,12 @@ export function TodaPayCheckout({
       const finalMerchantProfileId = prepared.merchantProfileId || merchantProfileId;
       const finalMerchantReference = prepared.merchantReference || merchantReference || finalBookingId;
       const finalCustomer = prepared.customer || customer;
-      const returnUrl = `${window.location.origin}/payment/callback`;
+
+      // Use proper deep link for mobile apps, web URL for browser
+      const isNative = Capacitor.isNativePlatform();
+      const returnUrl = isNative
+        ? `todapay://payment/callback`
+        : `${window.location.origin}/payment/callback`;
       const resultUrl = `${window.location.origin}/payment/result`;
 
       const { data, error: fnError } = await supabase.functions.invoke('suvat-pay', {
