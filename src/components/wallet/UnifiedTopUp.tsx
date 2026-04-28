@@ -102,7 +102,11 @@ export function UnifiedTopUp({
         throw new Error(data?.error || error?.message || 'Payment initiation failed');
       }
 
-      // Store reference for callback processing
+      if (!data?.referenceNumber || !data?.redirectUrl) {
+        throw new Error('No reference number or payment URL received from payment gateway');
+      }
+
+      // Store reference and URL for callback processing
       sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
         referenceNumber: data.referenceNumber,
         pollUrl: data.pollUrl,
@@ -110,10 +114,15 @@ export function UnifiedTopUp({
         walletId: wallet.id,
         userId: user.id,
         amount,
+        paymentUrl: data.redirectUrl, // Store payment URL for button
       }));
 
-      // Redirect to payment gateway
-      window.location.href = data.redirectUrl;
+      console.log('✅ Wallet top-up payment initiated');
+      console.log('📌 Reference:', data.referenceNumber);
+      console.log('🔗 Payment URL:', data.redirectUrl);
+
+      // Navigate to callback page which will show payment button and start polling
+      window.location.href = '/payment/callback';
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('Payment failed. Please try again.');
