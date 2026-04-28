@@ -366,6 +366,27 @@ async function syncPaymentStatus(supabase: any, data: Record<string, any>) {
   const transaction = await findTransaction(supabase, referenceNumber, merchantReference);
 
   if (!transaction) {
+    if (merchantReference) {
+      const { data: booking } = await supabase.from('bookings').update({
+        payment_status: paymentStatus === 'completed' ? 'paid' : 'pending',
+        status: paymentStatus === 'completed' ? 'confirmed' : 'pending',
+        updated_at: new Date().toISOString(),
+      }).eq('id', merchantReference).select('id').maybeSingle();
+
+      if (booking) {
+        await supabase.from('payment_verifications').insert({
+          booking_id: booking.id,
+          gateway_provider: 'suvat_pay',
+          gateway_reference: referenceNumber || merchantReference,
+          verification_status: paymentStatus === 'completed' ? 'verified' : paymentStatus === 'failed' ? 'failed' : 'pending',
+          gateway_response: data,
+          verified_at: paymentStatus === 'pending' ? null : new Date().toISOString(),
+        });
+
+        return { paymentStatus, transactionFound: false, bookingUpdated: true };
+      }
+    }
+
     console.warn('No local transaction found for Pesepay result', { referenceNumber, merchantReference, status: data.transactionStatus });
     return { paymentStatus, transactionFound: false };
   }
