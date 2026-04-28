@@ -137,9 +137,24 @@ const VenueBookingForm = ({ venue, selectedDate, onSuccess }: VenueBookingFormPr
       
       navigate('/booking/confirm', {
         state: {
-          booking,
-          bookingType: 'venue',
-          venueName: venue.name,
+          type: 'venue',
+          itemId: venue.id,
+          itemName: venue.name,
+          totalPrice,
+          basePrice: totalPrice,
+          passengerName: formData.passenger_name,
+          passengerEmail: formData.passenger_email,
+          passengerPhone: formData.passenger_phone,
+          startDatetime,
+          endDatetime,
+          eventDate: format(selectedDate, 'yyyy-MM-dd'),
+          eventTime: formData.start_time,
+          eventType: formData.event_type,
+          venue: venue.address,
+          to: venue.city,
+          numAttendees: formData.expected_guests,
+          existingBookingId: booking?.id,
+          existingBookingReference: booking?.booking_reference,
         }
       });
 
