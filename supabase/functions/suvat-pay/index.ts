@@ -13,9 +13,9 @@ const PESEPAY_BASE_PATH = PESEPAY_ENV === 'test' ? '/payments-engine/v1' : '/api
 
 // Use Deno.connect with manual TLS to bypass hyper's HTTP header parsing
 async function pesepayRequest(path: string, method: string, body?: string, authKey?: string, timeoutMs = 15000): Promise<{ status: number; body: string }> {
-  const hostname = 'api.pesepay.com';
+  const hostname = PESEPAY_HOST;
   const port = 443;
-  const fullPath = `/api/payments-engine/v1${path}`;
+  const fullPath = `${PESEPAY_BASE_PATH}${path}`;
 
   // Build raw HTTP request
   const contentLength = body ? new TextEncoder().encode(body).length : 0;
