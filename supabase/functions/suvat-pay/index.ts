@@ -296,11 +296,12 @@ serve(async (req) => {
             });
           }
           console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
+          console.log('FULL PESEPAY RESPONSE (check-payment):', JSON.stringify(data, null, 2));
 
           await syncPaymentStatus(supabase, data);
 
           const isPaid = isPaidStatus(data.transactionStatus);
-          console.log('Payment isPaid check:', { status: data.transactionStatus, isPaid });
+          console.log('Payment isPaid check:', { status: data.transactionStatus, isPaid, allStatuses: Object.keys(data) });
 
           return new Response(JSON.stringify({
             success: true,
@@ -309,6 +310,12 @@ serve(async (req) => {
             amount: data.amountDetails?.totalTransactionAmount,
             currency: data.amountDetails?.currencyCode,
             raw: data,
+            debugInfo: {
+              receivedStatus: data.transactionStatus,
+              isPaidCheck: isPaid,
+              allKeys: Object.keys(data),
+              rawStatusValue: data.transactionStatus,
+            }
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });

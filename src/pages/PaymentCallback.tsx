@@ -61,8 +61,10 @@ const PaymentCallback = () => {
         referenceNumber,
         status: data?.status,
         paid: data?.paid,
-        rawData: JSON.stringify(data).substring(0, 300)
+        fullResponse: data
       });
+
+      console.log('Full Pesepay Response (formatted):', JSON.stringify(data, null, 2));
 
       if (data?.paid) {
         sessionStorage.removeItem('suvat_pay_ref');
