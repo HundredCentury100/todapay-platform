@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import CryptoJS from "npm:crypto-js@4.2.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -155,7 +156,7 @@ serve(async (req) => {
 
     // Pesepay posts final results to resultUrl without our action wrapper.
     if (!action && (body.payload || body.referenceNumber || body.transactionStatus || body.reference || body.merchantReference)) {
-      const callbackData = await parsePesepayBody(body, encryptionKey);
+      const callbackData = await parsePesepayBody(body, encryptionKey, integrationKey);
       const syncResult = await syncPaymentStatus(supabase, callbackData);
 
       return new Response(JSON.stringify({ success: true, ...syncResult }), {
@@ -213,7 +214,7 @@ serve(async (req) => {
 
         let data;
         try {
-          data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+          data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
         } catch (parseErr) {
           console.error('Failed to parse response:', response.body.substring(0, 500));
           throw new Error('Invalid response from payment gateway');
@@ -273,7 +274,27 @@ serve(async (req) => {
             throw new Error(`Status check failed: ${response.status} - ${response.body.substring(0, 100)}`);
           }
 
-          const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+          let data: Record<string, any>;
+          try {
+            data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
+          } catch (parseError: any) {
+            console.error('Unable to decrypt check-payment payload', {
+              referenceNumber,
+              error: parseError?.message || String(parseError),
+              responseStatus: response.status,
+              responseLength: response.body.length,
+            });
+
+            return new Response(JSON.stringify({
+              success: false,
+              paid: false,
+              status: 'PENDING_VERIFICATION',
+              error: 'Payment status is pending verification',
+            }), {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
           console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
 
           await syncPaymentStatus(supabase, data);
@@ -313,59 +334,56 @@ serve(async (req) => {
   }
 });
 
-// AES-CBC encryption matching Pesepay's CryptoJS format
-// CryptoJS.enc.Utf8.parse(key) converts key to raw UTF-8 bytes
-// IV = first 16 chars of encryption key  
-// CryptoJS pads key to next valid AES size (16, 24, 32) with zeros
-function getKeyBytes(key: string): Uint8Array {
-  const encoder = new TextEncoder();
-  const rawBytes = encoder.encode(key);
-  // Pad to nearest valid AES key size
-  const validSizes = [16, 24, 32];
-  const targetSize = validSizes.find(s => s >= rawBytes.length) || 32;
-  const padded = new Uint8Array(targetSize);
-  padded.set(rawBytes.slice(0, targetSize));
-  return padded;
+// Pesepay's docs use CryptoJS AES-256-CBC with the first 16 key chars as IV.
+// Using CryptoJS here keeps encryption/decryption identical to their examples.
+function encryptPayload(data: string, key: string): string {
+  const keyBytes = CryptoJS.enc.Utf8.parse(key);
+  const ivBytes = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
+  const encrypted = CryptoJS.AES.encrypt(data, keyBytes, {
+    iv: ivBytes,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+
+  return encrypted.ciphertext.toString(CryptoJS.enc.Base64);
 }
 
-async function encryptPayload(data: string, key: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyBytes = getKeyBytes(key);
-  const ivBytes = encoder.encode(key.slice(0, 16));
-  
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw', keyBytes, { name: 'AES-CBC' }, false, ['encrypt']
-  );
+function decryptPayload(data: string, key: string): string {
+  const encryptedPayload = data.trim();
+  const keyBytes = CryptoJS.enc.Utf8.parse(key);
+  const ivBytes = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
+  const cipherParams = CryptoJS.lib.CipherParams.create({
+    ciphertext: CryptoJS.enc.Base64.parse(encryptedPayload),
+  });
+  const decryptedBytes = CryptoJS.AES.decrypt(cipherParams, keyBytes, {
+    iv: ivBytes,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+  const decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-CBC', iv: ivBytes }, cryptoKey, encoder.encode(data)
-  );
+  if (!decrypted) {
+    throw new Error('Decryption failed');
+  }
 
-  // CryptoJS .toString() outputs base64 of just the ciphertext
-  return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+  return decrypted;
 }
 
-async function decryptPayload(data: string, key: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyBytes = getKeyBytes(key);
-  const ivBytes = encoder.encode(key.slice(0, 16));
-  const encrypted = Uint8Array.from(atob(data), c => c.charCodeAt(0));
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw', keyBytes, { name: 'AES-CBC' }, false, ['decrypt']
-  );
-
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-CBC', iv: ivBytes }, cryptoKey, encrypted
-  );
-
-  return new TextDecoder().decode(decrypted);
-}
-
-async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string): Promise<Record<string, any>> {
+async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string, fallbackKey?: string): Promise<Record<string, any>> {
   if (typeof body.payload === 'string') {
-    const decrypted = await decryptPayload(body.payload, encryptionKey);
-    return JSON.parse(decrypted);
+    const keysToTry = [encryptionKey, fallbackKey].filter(Boolean) as string[];
+    let lastError: unknown;
+
+    for (const key of keysToTry) {
+      try {
+        const decrypted = decryptPayload(body.payload, key);
+        return JSON.parse(decrypted);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('Decryption failed');
   }
 
   return body as Record<string, any>;
