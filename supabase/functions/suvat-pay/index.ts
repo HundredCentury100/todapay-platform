@@ -130,21 +130,53 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const body = await req.json();
+    const rawBody = await req.text();
+    const body = rawBody ? JSON.parse(rawBody) : {};
     const { action } = body;
+
+    // Pesepay posts final results to resultUrl without our action wrapper.
+    if (!action && (body.payload || body.referenceNumber || body.transactionStatus || body.reference || body.merchantReference)) {
+      const callbackData = await parsePesepayBody(body, encryptionKey);
+      const syncResult = await syncPaymentStatus(supabase, callbackData);
+
+      return new Response(JSON.stringify({ success: true, ...syncResult }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     switch (action) {
       case 'initiate': {
-        const { amount, currencyCode, reason, resultUrl, returnUrl, bookingId, merchantProfileId } = body;
+        const { amount, currencyCode, reason, returnUrl, bookingId, merchantProfileId, customer, paymentMethodCode, paymentChannel, merchantReference } = body;
+        const numericAmount = Number(amount);
+
+        if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+          throw new Error('Invalid payment amount');
+        }
+
+        const selectedPaymentMethodCode = paymentMethodCode
+          || (paymentChannel === 'mobile_money' ? 'PZW211' : Deno.env.get('PESEPAY_DEFAULT_PAYMENT_METHOD_CODE') || 'PZW212');
+        const customerPhone = String(customer?.phoneNumber || customer?.phone || body.customerPhoneNumber || '0770000000');
+        const pesepayResultUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/suvat-pay`;
+        const safeMerchantReference = String(merchantReference || bookingId || crypto.randomUUID());
 
         const transactionDetails = {
           amountDetails: {
-            amount: amount,
+            amount: Math.round(numericAmount * 100) / 100,
             currencyCode: currencyCode || 'USD',
           },
+          merchantReference: safeMerchantReference,
           reasonForPayment: reason || 'Suvat Pay - Booking Payment',
-          resultUrl: resultUrl,
+          resultUrl: pesepayResultUrl,
           returnUrl: returnUrl,
+          paymentMethodCode: selectedPaymentMethodCode,
+          customer: {
+            email: String(customer?.email || 'payments@todapayments.com'),
+            phoneNumber: customerPhone,
+            name: String(customer?.name || 'TodaPay Customer'),
+          },
+          paymentMethodRequiredFields: selectedPaymentMethodCode === 'PZW211'
+            ? { customerPhoneNumber: customerPhone }
+            : {},
         };
 
         console.log('Initiating payment, integration key length:', integrationKey.length, 'encryption key length:', encryptionKey.length);
@@ -162,13 +194,7 @@ serve(async (req) => {
 
         let data;
         try {
-          const rawData = JSON.parse(response.body);
-          // If response contains encrypted payload, decrypt it
-          if (rawData.payload && typeof rawData.payload === 'string') {
-            data = JSON.parse(await decryptPayload(rawData.payload, encryptionKey));
-          } else {
-            data = rawData;
-          }
+          data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
         } catch (parseErr) {
           console.error('Failed to parse response:', response.body.substring(0, 500));
           throw new Error('Invalid response from payment gateway');
@@ -179,7 +205,9 @@ serve(async (req) => {
             payment_metadata: {
               gateway: 'suvat_pay',
               pesepay_reference: data.referenceNumber,
+              merchant_reference: safeMerchantReference,
               poll_url: data.pollUrl,
+              payment_method_code: selectedPaymentMethodCode,
             },
           }).eq('booking_id', bookingId);
         }
@@ -198,7 +226,7 @@ serve(async (req) => {
         const { referenceNumber } = body;
 
         const response = await pesepayRequest(
-          `/payments/check-payment?referenceNumber=${referenceNumber}`,
+          `/payments/check-payment?referenceNumber=${encodeURIComponent(referenceNumber)}`,
           'GET',
           undefined,
           integrationKey
@@ -208,10 +236,10 @@ serve(async (req) => {
           throw new Error(`Status check failed: ${response.status}`);
         }
 
-        const data = JSON.parse(response.body);
+        const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+        await syncPaymentStatus(supabase, data);
 
-        const successStatuses = ['SUCCESS', 'PAID', 'COMPLETED'];
-        const isPaid = successStatuses.includes(String(data.transactionStatus || '').toUpperCase());
+        const isPaid = isPaidStatus(data.transactionStatus);
 
         return new Response(JSON.stringify({
           success: true,
