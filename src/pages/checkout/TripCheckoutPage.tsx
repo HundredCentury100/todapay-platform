@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import omariLogo from "@/assets/omari-logo.png";
 import innbucksLogo from "@/assets/innbucks-logo.png";
-import { SuvatPayCheckout, OmariCheckout, InnBucksCheckout, WalletPayment } from "@/components/checkout";
+import { TodaPayCheckout, OmariCheckout, InnBucksCheckout, WalletPayment } from "@/components/checkout";
 
 const verticalIcons: Record<CartVertical, React.ElementType> = {
   bus: Bus, event: Ticket, stay: Hotel, workspace: Briefcase,
@@ -30,7 +30,7 @@ const verticalLabels: Record<CartVertical, string> = {
   transfer: 'Transfer', car_rental: 'Car Rental', rail: 'Rail',
 };
 
-type PaymentView = 'methods' | 'suvat' | 'omari' | 'innbucks';
+type PaymentView = 'methods' | 'todapay' | 'omari' | 'innbucks';
 
 export default function TripCheckoutPage() {
   const navigate = useNavigate();
@@ -84,7 +84,7 @@ export default function TripCheckoutPage() {
       for (const item of items) {
         const ref = generateRef();
         refs.push(ref);
-        const ticketNum = `TRP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+        const ticketNum = `TRP-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         const itemDiscountShare = discount.amount > 0 ? (item.totalPrice / getTotal()) * discount.amount : 0;
         const finalItemPrice = item.totalPrice - itemDiscountShare;
 
@@ -220,16 +220,16 @@ export default function TripCheckoutPage() {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Payment Method</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {paymentView === 'suvat' ? (
-              <SuvatPayCheckout amount={finalTotal} reason={`Trip Bundle (${items.length} services)`} onCancel={() => setPaymentView('methods')} onPaymentComplete={() => handleSubmit('payment_gateway')} />
+            {paymentView === 'todapay' ? (
+              <TodaPayCheckout amount={finalTotal} reason={`Trip Bundle (${items.length} services)`} onCancel={() => setPaymentView('methods')} onPaymentComplete={() => handleSubmit('payment_gateway')} />
             ) : paymentView === 'omari' ? (
               <OmariCheckout amount={finalTotal} reference={`trip-${Date.now()}`} currency="USD" description={`Trip Bundle (${items.length} services)`} onCancel={() => setPaymentView('methods')} onSuccess={() => handleSubmit('omari')} />
             ) : paymentView === 'innbucks' ? (
               <InnBucksCheckout amount={finalTotal} reference={`trip-${Date.now()}`} currency="USD" description={`Trip Bundle (${items.length} services)`} onCancel={() => setPaymentView('methods')} onSuccess={() => handleSubmit('innbucks')} />
             ) : (
               <>
-                <Button onClick={() => setPaymentView('suvat')} className="w-full h-12 rounded-full font-semibold" disabled={loading}>
-                  <Shield className="w-4 h-4 mr-2" />Pay with Suvat Pay
+                <Button onClick={() => setPaymentView('todapay')} className="w-full h-12 rounded-full font-semibold" disabled={loading}>
+                  <Shield className="w-4 h-4 mr-2" />Pay with TodaPay
                 </Button>
                 <Button onClick={() => setPaymentView('omari')} variant="outline" className="w-full h-11 rounded-full font-semibold border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400" disabled={loading}>
                   <img src={omariLogo} alt="O'mari" className="w-5 h-5 object-contain mr-2" />Pay with O'mari
@@ -255,7 +255,7 @@ export default function TripCheckoutPage() {
       {/* Sticky bottom pay bar */}
       {paymentView === 'methods' && (
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-40 pb-[calc(env(safe-area-inset-bottom,0px)+3.5rem)] md:pb-4">
-          <Button className="w-full h-12 rounded-xl" onClick={() => setPaymentView('suvat')} disabled={loading}>
+          <Button className="w-full h-12 rounded-xl" onClick={() => setPaymentView('todapay')} disabled={loading}>
             <Shield className="w-4 h-4 mr-2" />Pay {convertPrice(finalTotal)}
           </Button>
         </div>

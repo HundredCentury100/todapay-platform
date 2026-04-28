@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MobileAppLayout from "@/components/MobileAppLayout";
-import { SuvatPayCheckout, OmariCheckout, InnBucksCheckout } from "@/components/checkout";
+import { TodaPayCheckout, OmariCheckout, InnBucksCheckout } from "@/components/checkout";
 import { UniversalBillReceipt } from "@/components/bills/UniversalBillReceipt";
 import { createNotification } from "@/services/userNotificationService";
 import { recordBillerUsage } from "@/hooks/useSavedBillers";
@@ -759,7 +759,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
 
           {step === "payment" && showSuvatPay && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <SuvatPayCheckout
+              <TodaPayCheckout
                 amount={totalAmount}
                 currency={currency}
                 reason={`${config.name} - ${accountNumber}${serviceFee > 0 ? ` (incl. $${serviceFee} service fee)` : ''}`}

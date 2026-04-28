@@ -13,7 +13,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import MobileAppLayout from "@/components/MobileAppLayout";
-import { SuvatPayCheckout } from "@/components/checkout";
+import { TodaPayCheckout } from "@/components/checkout";
 
 const PRESET_AMOUNTS = [5, 10, 25, 50, 100, 200];
 
@@ -280,7 +280,7 @@ const GiftCardPurchase = () => {
 
           {step === "payment" && showPayment && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <SuvatPayCheckout
+              <TodaPayCheckout
                 amount={finalAmount}
                 currency={currency}
                 reason={`Gift Card for ${recipientName}`}

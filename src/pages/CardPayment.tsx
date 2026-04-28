@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { supabase } from "@/integrations/supabase/client";
-import { SuvatPayCheckout } from "@/components/checkout";
+import { TodaPayCheckout } from "@/components/checkout";
 import { toast } from "sonner";
 
 type Step = "form" | "confirm" | "payment" | "success";
@@ -151,7 +151,7 @@ const CardPayment = () => {
 
           {step === "payment" && (
             <motion.div key="payment" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <SuvatPayCheckout
+              <TodaPayCheckout
                 amount={numAmount}
                 currency="USD"
                 reason={`P2P card payment to ${recipientName}`}

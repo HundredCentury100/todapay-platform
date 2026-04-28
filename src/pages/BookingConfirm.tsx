@@ -31,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMerchantPaymentMethods, createTransaction, calculatePlatformFee, uploadPaymentProof } from "@/services/paymentService";
 import { agentRemittanceService } from "@/services/agentRemittanceService";
 import { MerchantPaymentMethod } from "@/types/payment";
-import { UniversalCheckout, ExpressCheckout, PaymentCountdown, SuvatPayCheckout, WalletPayment, OmariCheckout, InnBucksCheckout } from "@/components/checkout";
+import { UniversalCheckout, ExpressCheckout, PaymentCountdown, TodaPayCheckout, WalletPayment, OmariCheckout, InnBucksCheckout } from "@/components/checkout";
 import { AgentPaymentOptions, AgentPaymentMethod } from "@/components/agent/AgentPaymentOptions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserWallet } from "@/hooks/useUserWallet";
@@ -42,7 +42,7 @@ import { cn } from "@/lib/utils";
 import { BookingProgressStepper } from "@/components/booking/BookingProgressStepper";
 import { PaymentMethodsSkeleton } from "@/components/booking/BookingCheckoutSkeleton";
 
-type PaymentView = 'select' | 'suvat' | 'omari' | 'innbucks' | 'wallet' | 'cash' | 'merchant';
+type PaymentView = 'select' | 'todapay' | 'omari' | 'innbucks' | 'wallet' | 'cash' | 'merchant';
 
 const CashConfirmationView = ({ 
   amount, 
@@ -206,7 +206,7 @@ const BookingConfirm = () => {
 
   const handlePaymentMethodSelect = async (methodType: string, paymentData: any) => {
     if (methodType === 'payment_gateway') {
-      setPaymentView('suvat');
+      setPaymentView('todapay');
       return;
     }
     await handleConfirm(methodType, paymentData);
@@ -513,8 +513,8 @@ const BookingConfirm = () => {
   // Payment method tiles data
   const paymentTiles = [
     {
-      id: 'suvat' as PaymentView,
-      label: 'Suvat Pay',
+      id: 'todapay' as PaymentView,
+      label: 'TodaPay',
       subtitle: 'Card · Mobile · Bank',
       icon: <CreditCard className="w-5 h-5" />,
       gradient: 'from-primary to-primary-dark',
@@ -858,12 +858,12 @@ const BookingConfirm = () => {
                     </div>
                   </div>
                   <p className="text-center text-[10px] text-muted-foreground/50">
-                    Powered by <span className="font-semibold text-muted-foreground/70">Suvat Pay</span> · Toda Technologies
+                    Powered by <span className="font-semibold text-muted-foreground/70">TodaPay</span> · Toda Technologies
                   </p>
                 </motion.div>
-              ) : paymentView === 'suvat' ? (
-                <motion.div key="suvat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                  <SuvatPayCheckout amount={totalAmount} reason={`${bookingData.itemName}${bookingData.from ? ` - ${bookingData.from} to ${bookingData.to}` : ''}`} bookingId={bookingId || undefined} merchantProfileId={merchantProfileId || undefined} onCancel={() => setPaymentView('select')} onPaymentComplete={(data) => handleConfirm('payment_gateway', data)} />
+              ) : paymentView === 'todapay' ? (
+                <motion.div key="todapay" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                  <TodaPayCheckout amount={totalAmount} reason={`${bookingData.itemName}${bookingData.from ? ` - ${bookingData.from} to ${bookingData.to}` : ''}`} bookingId={bookingId || undefined} merchantProfileId={merchantProfileId || undefined} onCancel={() => setPaymentView('select')} onPaymentComplete={(data) => handleConfirm('payment_gateway', data)} />
                 </motion.div>
               ) : paymentView === 'omari' ? (
                 <motion.div key="omari" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -916,9 +916,9 @@ const BookingConfirm = () => {
               <div className="text-lg font-bold">{convertPrice(totalAmount)}</div>
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Total due</div>
             </div>
-            <Button 
-              onClick={() => setPaymentView('suvat')} 
-              className="rounded-2xl px-6 h-12 text-sm font-semibold shadow-lg shadow-primary/25" 
+            <Button
+              onClick={() => setPaymentView('todapay')}
+              className="rounded-2xl px-6 h-12 text-sm font-semibold shadow-lg shadow-primary/25"
               disabled={saving}
             >
               <Lock className="w-3.5 h-3.5 mr-1.5" />Pay Now

@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-interface SuvatPayCheckoutProps {
+interface TodaPayCheckoutProps {
   amount: number;
   currency?: string;
   reason?: string;
@@ -37,7 +37,7 @@ const CURRENCIES = [
   { code: 'MZN', label: 'Mozambican Metical', symbol: 'MT' },
 ];
 
-export function SuvatPayCheckout({
+export function TodaPayCheckout({
   amount,
   currency = 'USD',
   reason,
@@ -46,7 +46,7 @@ export function SuvatPayCheckout({
   onPaymentComplete,
   onCancel,
   compact = false,
-}: SuvatPayCheckoutProps) {
+}: TodaPayCheckoutProps) {
   const { convertPrice } = useCurrency();
   const [selectedChannel, setSelectedChannel] = useState<PaymentChannel>('card');
   const [selectedCurrency, setSelectedCurrency] = useState(currency);
@@ -72,7 +72,7 @@ export function SuvatPayCheckout({
           action: 'initiate',
           amount,
           currencyCode: selectedCurrency,
-          reason: reason || 'Suvat Pay - Payment',
+          reason: reason || 'TodaPay - Payment',
           returnUrl,
           resultUrl,
           bookingId,
@@ -118,7 +118,7 @@ export function SuvatPayCheckout({
             <div className="flex items-center gap-2">
               <BrandLogo size="xs" variant="white" />
               <div>
-                <h3 className="font-bold text-sm tracking-wide">SUVAT PAY</h3>
+                <h3 className="font-bold text-sm tracking-wide">TODAPAY</h3>
                 <p className="text-[10px] opacity-70">Secure Payment Gateway</p>
               </div>
             </div>
@@ -226,7 +226,7 @@ export function SuvatPayCheckout({
             {isProcessing ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Connecting to Suvat Pay...
+                Connecting to TodaPay...
               </span>
             ) : (
               <span className="flex items-center gap-2">
@@ -262,7 +262,7 @@ export function SuvatPayCheckout({
           </div>
 
           <p className="text-center text-[10px] text-muted-foreground/60">
-            Powered by <span className="font-semibold text-muted-foreground/80">Suvat Pay</span> · Toda Technologies
+            Powered by <span className="font-semibold text-muted-foreground/80">TodaPay</span> · Toda Technologies
           </p>
         </CardContent>
       </Card>

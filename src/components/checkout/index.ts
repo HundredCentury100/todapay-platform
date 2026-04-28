@@ -5,7 +5,7 @@ export { SplitPaymentManager } from './SplitPaymentManager';
 export { QRCodePayment } from './QRCodePayment';
 export { PaymentCountdown } from './PaymentCountdown';
 export { CorporateCheckoutWrapper } from './CorporateCheckoutWrapper';
-export { SuvatPayCheckout } from './SuvatPayCheckout';
+export { TodaPayCheckout } from './TodaPayCheckout';
 export { OmariCheckout } from './OmariCheckout';
 export { InnBucksCheckout } from './InnBucksCheckout';
 export { WalletPayment } from './WalletPayment';

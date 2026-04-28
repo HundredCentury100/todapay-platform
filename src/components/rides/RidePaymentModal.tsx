@@ -14,7 +14,7 @@ import { Wallet, Banknote, CreditCard, CheckCircle, Loader2, Shield } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { useUserWallet } from "@/hooks/useUserWallet";
 import { toast } from "sonner";
-import { SuvatPayCheckout } from "@/components/checkout";
+import { TodaPayCheckout } from "@/components/checkout";
 
 interface RidePaymentModalProps {
   open: boolean;
@@ -118,7 +118,7 @@ export const RidePaymentModal = ({
             <DialogTitle>Pay with Suvat Pay</DialogTitle>
             <DialogDescription>Complete your ride payment securely</DialogDescription>
           </DialogHeader>
-          <SuvatPayCheckout
+          <TodaPayCheckout
             amount={amount}
             reason={`Ride payment`}
             onCancel={() => setShowSuvatPay(false)}
