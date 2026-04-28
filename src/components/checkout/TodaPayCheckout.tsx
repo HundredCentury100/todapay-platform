@@ -107,6 +107,16 @@ export function TodaPayCheckout({
 
       if (fnError) throw fnError;
 
+      console.log('💳 PESEPAY INITIATE RESPONSE:', {
+        success: data?.success,
+        hasRedirectUrl: !!data?.redirectUrl,
+        referenceNumber: data?.referenceNumber,
+        pollUrl: data?.pollUrl,
+        fullResponse: data
+      });
+
+      console.log('📋 Full Pesepay Initiate Response (formatted):', JSON.stringify(data, null, 2));
+
       if (data?.redirectUrl) {
         // Store payment reference for callback
         sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
@@ -115,7 +125,11 @@ export function TodaPayCheckout({
           merchantProfileId: finalMerchantProfileId,
           amount,
         }));
-        
+
+        console.log('✅ Payment initiated successfully, redirecting to Pesepay...');
+        console.log('🔗 Redirect URL:', data.redirectUrl);
+        console.log('📌 Reference:', data.referenceNumber);
+
         // Redirect to payment page
         window.location.href = data.redirectUrl;
       } else {

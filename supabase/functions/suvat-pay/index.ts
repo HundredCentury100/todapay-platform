@@ -215,6 +215,14 @@ serve(async (req) => {
         let data;
         try {
           data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
+          console.log('🎉 PESEPAY INITIATE SUCCESS - Full decrypted response:', JSON.stringify(data, null, 2));
+          console.log('📌 Payment initiated:', {
+            referenceNumber: data.referenceNumber,
+            redirectUrl: data.redirectUrl,
+            pollUrl: data.pollUrl,
+            transactionStatus: data.transactionStatus,
+            allKeys: Object.keys(data)
+          });
         } catch (parseErr) {
           console.error('Failed to parse response:', response.body.substring(0, 500));
           throw new Error('Invalid response from payment gateway');
