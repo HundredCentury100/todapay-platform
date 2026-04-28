@@ -274,7 +274,27 @@ serve(async (req) => {
             throw new Error(`Status check failed: ${response.status} - ${response.body.substring(0, 100)}`);
           }
 
-          const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
+          let data: Record<string, any>;
+          try {
+            data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
+          } catch (parseError: any) {
+            console.error('Unable to decrypt check-payment payload', {
+              referenceNumber,
+              error: parseError?.message || String(parseError),
+              responseStatus: response.status,
+              responseLength: response.body.length,
+            });
+
+            return new Response(JSON.stringify({
+              success: false,
+              paid: false,
+              status: 'PENDING_VERIFICATION',
+              error: 'Payment status is pending verification',
+            }), {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
           console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
 
           await syncPaymentStatus(supabase, data);
