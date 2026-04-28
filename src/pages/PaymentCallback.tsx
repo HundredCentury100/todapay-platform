@@ -19,10 +19,11 @@ const PaymentCallback = () => {
   const [attempts, setAttempts] = useState(0);
 
   useEffect(() => {
-    checkPaymentStatus();
+    checkPaymentStatus(0);
   }, []);
 
-  const checkPaymentStatus = async () => {
+  const checkPaymentStatus = async (attemptNum: number = 0) => {
+    setAttempts(attemptNum);
     try {
       const storedRef = sessionStorage.getItem('suvat_pay_ref');
       if (!storedRef) {
@@ -117,23 +118,21 @@ const PaymentCallback = () => {
         }
 
         setState('success');
-      } else if (data?.status === 'FAILED' || data?.status === 'CANCELLED') {
+      } else if (['FAILED', 'CANCELLED', 'DECLINED', 'TIMEOUT'].includes(String(data?.status || '').toUpperCase())) {
         setState('failed');
         sessionStorage.removeItem('suvat_pay_ref');
-      } else if (attempts < 5) {
+      } else if (attemptNum < 20) {
         setTimeout(() => {
-          setAttempts(a => a + 1);
-          checkPaymentStatus();
+          checkPaymentStatus(attemptNum + 1);
         }, 3000);
       } else {
         setState('failed');
       }
     } catch (err) {
       console.error('Payment check error:', err);
-      if (attempts < 3) {
+      if (attemptNum < 5) {
         setTimeout(() => {
-          setAttempts(a => a + 1);
-          checkPaymentStatus();
+          checkPaymentStatus(attemptNum + 1);
         }, 3000);
       } else {
         setState('failed');
