@@ -131,7 +131,8 @@ serve(async (req) => {
     );
 
     const rawBody = await req.text();
-    const body = rawBody ? JSON.parse(rawBody) : {};
+    const queryBody = Object.fromEntries(new URL(req.url).searchParams.entries());
+    const body = rawBody ? JSON.parse(rawBody) : queryBody;
     const { action } = body;
 
     // Pesepay posts final results to resultUrl without our action wrapper.
