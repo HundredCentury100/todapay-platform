@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence, motion } from "framer-motion";
 import SplashScreen from "@/components/SplashScreen";
@@ -10,6 +10,7 @@ import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
+import { App as CapApp } from "@capacitor/app";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
@@ -336,6 +337,30 @@ const AuthGatedHome = () => {
   return <Index />;
 };
 
+const DeepLinkHandler = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Listen for deep link events (for mobile app)
+    const listener = CapApp.addListener('appUrlOpen', (event) => {
+      console.log('🔗 Deep link opened:', event.url);
+
+      // Parse the deep link URL
+      const url = new URL(event.url);
+      const path = url.pathname + url.search;
+
+      console.log('📍 Navigating to:', path);
+      navigate(path);
+    });
+
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [navigate]);
+
+  return null;
+};
+
 const AnimatedRoutes = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   return (
@@ -387,6 +412,7 @@ const AppContent = () => {
   return (
     <>
       <SwipeBackProvider />
+      <DeepLinkHandler />
       {showSplash && !hasSeenSplash && (
         <SplashScreen onComplete={handleSplashComplete} minDisplayTime={3000} />
       )}
