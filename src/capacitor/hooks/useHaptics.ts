@@ -1,4 +1,4 @@
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { isPluginAvailable } from './usePlatform';
 
 /**
@@ -49,7 +49,7 @@ export const useHaptics = () => {
   const success = async () => {
     if (!isHapticsAvailable) return;
     try {
-      await Haptics.notification({ type: 'SUCCESS' });
+      await Haptics.notification({ type: NotificationType.Success });
     } catch (error) {
       console.error('Haptics error:', error);
     }
@@ -61,7 +61,7 @@ export const useHaptics = () => {
   const warning = async () => {
     if (!isHapticsAvailable) return;
     try {
-      await Haptics.notification({ type: 'WARNING' });
+      await Haptics.notification({ type: NotificationType.Warning });
     } catch (error) {
       console.error('Haptics error:', error);
     }
@@ -73,7 +73,7 @@ export const useHaptics = () => {
   const error = async () => {
     if (!isHapticsAvailable) return;
     try {
-      await Haptics.notification({ type: 'ERROR' });
+      await Haptics.notification({ type: NotificationType.Error });
     } catch (error) {
       console.error('Haptics error:', error);
     }

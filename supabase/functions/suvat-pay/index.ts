@@ -6,13 +6,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const PESEPAY_API_URL = 'https://api.pesepay.com/api/payments-engine/v1';
+// Pesepay environment switch — set PESEPAY_ENV=test for sandbox, anything else hits live.
+const PESEPAY_ENV = (Deno.env.get('PESEPAY_ENV') ?? 'live').toLowerCase();
+const PESEPAY_HOST = PESEPAY_ENV === 'test' ? 'api.test.sandbox.pesepay.com' : 'api.pesepay.com';
+const PESEPAY_BASE_PATH = PESEPAY_ENV === 'test' ? '/payments-engine/v1' : '/api/payments-engine/v1';
 
 // Use Deno.connect with manual TLS to bypass hyper's HTTP header parsing
 async function pesepayRequest(path: string, method: string, body?: string, authKey?: string, timeoutMs = 15000): Promise<{ status: number; body: string }> {
-  const hostname = 'api.pesepay.com';
+  const hostname = PESEPAY_HOST;
   const port = 443;
-  const fullPath = `/api/payments-engine/v1${path}`;
+  const fullPath = `${PESEPAY_BASE_PATH}${path}`;
 
   // Build raw HTTP request
   const contentLength = body ? new TextEncoder().encode(body).length : 0;
