@@ -21,6 +21,14 @@ interface TodaPayCheckoutProps {
   reason?: string;
   bookingId?: string;
   merchantProfileId?: string;
+  merchantReference?: string;
+  customer?: { email?: string; phoneNumber?: string; phone?: string; name?: string };
+  preparePayment?: () => Promise<{
+    bookingId?: string;
+    merchantProfileId?: string | null;
+    merchantReference?: string;
+    customer?: { email?: string; phoneNumber?: string; phone?: string; name?: string };
+  }>;
   onPaymentComplete?: (data: any) => void;
   onCancel?: () => void;
   compact?: boolean;
@@ -43,6 +51,9 @@ export function TodaPayCheckout({
   reason,
   bookingId,
   merchantProfileId,
+  merchantReference,
+  customer,
+  preparePayment,
   onPaymentComplete,
   onCancel,
   compact = false,
@@ -64,6 +75,11 @@ export function TodaPayCheckout({
     setError(null);
 
     try {
+      const prepared = preparePayment ? await preparePayment() : {};
+      const finalBookingId = prepared.bookingId || bookingId;
+      const finalMerchantProfileId = prepared.merchantProfileId || merchantProfileId;
+      const finalMerchantReference = prepared.merchantReference || merchantReference || finalBookingId;
+      const finalCustomer = prepared.customer || customer;
       const returnUrl = `${window.location.origin}/payment/callback`;
       const resultUrl = `${window.location.origin}/payment/result`;
 
@@ -75,8 +91,11 @@ export function TodaPayCheckout({
           reason: reason || 'TodaPay - Payment',
           returnUrl,
           resultUrl,
-          bookingId,
-          merchantProfileId,
+          bookingId: finalBookingId,
+          merchantProfileId: finalMerchantProfileId,
+          merchantReference: finalMerchantReference,
+          customer: finalCustomer,
+          paymentChannel: selectedChannel,
         },
       });
 
@@ -86,8 +105,8 @@ export function TodaPayCheckout({
         // Store payment reference for callback
         sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
           referenceNumber: data.referenceNumber,
-          bookingId,
-          merchantProfileId,
+          bookingId: finalBookingId,
+          merchantProfileId: finalMerchantProfileId,
           amount,
         }));
         

@@ -55,6 +55,8 @@ export const createAgentBooking = async (
       agentType
     );
 
+    const isPendingOnlinePayment = bookingData.reservationType === 'pending_payment';
+
     const bookingRecord = {
       user_id: null,
       guest_email: bookingData.passengerEmail,
@@ -78,8 +80,8 @@ export const createAgentBooking = async (
       base_price: bookingData.totalPrice,
       total_price: bookingData.totalPrice,
       ticket_number: ticketNumber,
-      payment_status: 'paid',
-      status: 'confirmed',
+      payment_status: isPendingOnlinePayment ? 'pending' : 'paid',
+      status: isPendingOnlinePayment ? 'pending' : 'confirmed',
       event_date: bookingData.type === 'event' ? bookingData.eventDate : null,
       event_time: bookingData.type === 'event' ? bookingData.eventTime : null,
       event_venue: bookingData.type === 'event' ? bookingData.venue : null,

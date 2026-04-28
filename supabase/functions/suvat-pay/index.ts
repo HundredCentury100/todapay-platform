@@ -130,21 +130,54 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const body = await req.json();
+    const rawBody = await req.text();
+    const queryBody = Object.fromEntries(new URL(req.url).searchParams.entries());
+    const body = rawBody ? JSON.parse(rawBody) : queryBody;
     const { action } = body;
+
+    // Pesepay posts final results to resultUrl without our action wrapper.
+    if (!action && (body.payload || body.referenceNumber || body.transactionStatus || body.reference || body.merchantReference)) {
+      const callbackData = await parsePesepayBody(body, encryptionKey);
+      const syncResult = await syncPaymentStatus(supabase, callbackData);
+
+      return new Response(JSON.stringify({ success: true, ...syncResult }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     switch (action) {
       case 'initiate': {
-        const { amount, currencyCode, reason, resultUrl, returnUrl, bookingId, merchantProfileId } = body;
+        const { amount, currencyCode, reason, returnUrl, bookingId, merchantProfileId, customer, paymentMethodCode, paymentChannel, merchantReference } = body;
+        const numericAmount = Number(amount);
+
+        if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+          throw new Error('Invalid payment amount');
+        }
+
+        const selectedPaymentMethodCode = paymentMethodCode
+          || (paymentChannel === 'mobile_money' ? 'PZW211' : Deno.env.get('PESEPAY_DEFAULT_PAYMENT_METHOD_CODE') || 'PZW212');
+        const customerPhone = String(customer?.phoneNumber || customer?.phone || body.customerPhoneNumber || '0770000000');
+        const pesepayResultUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/suvat-pay`;
+        const safeMerchantReference = String(merchantReference || bookingId || crypto.randomUUID());
 
         const transactionDetails = {
           amountDetails: {
-            amount: amount,
+            amount: Math.round(numericAmount * 100) / 100,
             currencyCode: currencyCode || 'USD',
           },
+          merchantReference: safeMerchantReference,
           reasonForPayment: reason || 'Suvat Pay - Booking Payment',
-          resultUrl: resultUrl,
+          resultUrl: pesepayResultUrl,
           returnUrl: returnUrl,
+          paymentMethodCode: selectedPaymentMethodCode,
+          customer: {
+            email: String(customer?.email || 'payments@todapayments.com'),
+            phoneNumber: customerPhone,
+            name: String(customer?.name || 'TodaPay Customer'),
+          },
+          paymentMethodRequiredFields: selectedPaymentMethodCode === 'PZW211'
+            ? { customerPhoneNumber: customerPhone }
+            : {},
         };
 
         console.log('Initiating payment, integration key length:', integrationKey.length, 'encryption key length:', encryptionKey.length);
@@ -162,13 +195,7 @@ serve(async (req) => {
 
         let data;
         try {
-          const rawData = JSON.parse(response.body);
-          // If response contains encrypted payload, decrypt it
-          if (rawData.payload && typeof rawData.payload === 'string') {
-            data = JSON.parse(await decryptPayload(rawData.payload, encryptionKey));
-          } else {
-            data = rawData;
-          }
+          data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
         } catch (parseErr) {
           console.error('Failed to parse response:', response.body.substring(0, 500));
           throw new Error('Invalid response from payment gateway');
@@ -179,7 +206,9 @@ serve(async (req) => {
             payment_metadata: {
               gateway: 'suvat_pay',
               pesepay_reference: data.referenceNumber,
+              merchant_reference: safeMerchantReference,
               poll_url: data.pollUrl,
+              payment_method_code: selectedPaymentMethodCode,
             },
           }).eq('booking_id', bookingId);
         }
@@ -198,7 +227,7 @@ serve(async (req) => {
         const { referenceNumber } = body;
 
         const response = await pesepayRequest(
-          `/payments/check-payment?referenceNumber=${referenceNumber}`,
+          `/payments/check-payment?referenceNumber=${encodeURIComponent(referenceNumber)}`,
           'GET',
           undefined,
           integrationKey
@@ -208,10 +237,10 @@ serve(async (req) => {
           throw new Error(`Status check failed: ${response.status}`);
         }
 
-        const data = JSON.parse(response.body);
+        const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+        await syncPaymentStatus(supabase, data);
 
-        const successStatuses = ['SUCCESS', 'PAID', 'COMPLETED'];
-        const isPaid = successStatuses.includes(String(data.transactionStatus || '').toUpperCase());
+        const isPaid = isPaidStatus(data.transactionStatus);
 
         return new Response(JSON.stringify({
           success: true,
@@ -288,4 +317,114 @@ async function decryptPayload(data: string, key: string): Promise<string> {
   );
 
   return new TextDecoder().decode(decrypted);
+}
+
+async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string): Promise<Record<string, any>> {
+  if (typeof body.payload === 'string') {
+    const decrypted = await decryptPayload(body.payload, encryptionKey);
+    return JSON.parse(decrypted);
+  }
+
+  return body as Record<string, any>;
+}
+
+function isPaidStatus(status: unknown): boolean {
+  return ['SUCCESS', 'PAID', 'COMPLETED', 'COMPLETE'].includes(String(status || '').toUpperCase());
+}
+
+function isFailedStatus(status: unknown): boolean {
+  return ['FAILED', 'CANCELLED', 'CANCELED', 'DECLINED', 'TIMEOUT', 'EXPIRED'].includes(String(status || '').toUpperCase());
+}
+
+function toTransactionStatus(status: unknown): 'completed' | 'failed' | 'pending' {
+  if (isPaidStatus(status)) return 'completed';
+  if (isFailedStatus(status)) return 'failed';
+  return 'pending';
+}
+
+async function findTransaction(supabase: any, referenceNumber?: string, merchantReference?: string) {
+  const selectFields = 'id, booking_id, merchant_profile_id, amount, payment_metadata';
+  const refs = [referenceNumber, merchantReference].filter(Boolean) as string[];
+
+  for (const ref of refs) {
+    const direct = await supabase.from('transactions').select(selectFields).eq('transaction_reference', ref).maybeSingle();
+    if (direct.data) return direct.data;
+
+    const byPesepay = await supabase.from('transactions').select(selectFields).eq('payment_metadata->>pesepay_reference', ref).maybeSingle();
+    if (byPesepay.data) return byPesepay.data;
+
+    const byMerchant = await supabase.from('transactions').select(selectFields).eq('payment_metadata->>merchant_reference', ref).maybeSingle();
+    if (byMerchant.data) return byMerchant.data;
+  }
+
+  return null;
+}
+
+async function syncPaymentStatus(supabase: any, data: Record<string, any>) {
+  const referenceNumber = data.referenceNumber || data.reference;
+  const merchantReference = data.merchantReference;
+  const paymentStatus = toTransactionStatus(data.transactionStatus);
+  const transaction = await findTransaction(supabase, referenceNumber, merchantReference);
+
+  if (!transaction) {
+    if (merchantReference) {
+      const { data: booking } = await supabase.from('bookings').update({
+        payment_status: paymentStatus === 'completed' ? 'paid' : 'pending',
+        status: paymentStatus === 'completed' ? 'confirmed' : 'pending',
+        updated_at: new Date().toISOString(),
+      }).eq('id', merchantReference).select('id').maybeSingle();
+
+      if (booking) {
+        await supabase.from('payment_verifications').insert({
+          booking_id: booking.id,
+          gateway_provider: 'suvat_pay',
+          gateway_reference: referenceNumber || merchantReference,
+          verification_status: paymentStatus === 'completed' ? 'verified' : paymentStatus === 'failed' ? 'failed' : 'pending',
+          gateway_response: data,
+          verified_at: paymentStatus === 'pending' ? null : new Date().toISOString(),
+        });
+
+        return { paymentStatus, transactionFound: false, bookingUpdated: true };
+      }
+    }
+
+    console.warn('No local transaction found for Pesepay result', { referenceNumber, merchantReference, status: data.transactionStatus });
+    return { paymentStatus, transactionFound: false };
+  }
+
+  const mergedMetadata = {
+    ...(transaction.payment_metadata || {}),
+    gateway: 'suvat_pay',
+    pesepay_reference: referenceNumber,
+    merchant_reference: merchantReference,
+    pesepay_status: data.transactionStatus,
+    pesepay_result: data,
+    synced_at: new Date().toISOString(),
+  };
+
+  await supabase.from('transactions').update({
+    payment_status: paymentStatus,
+    payment_metadata: mergedMetadata,
+    updated_at: new Date().toISOString(),
+  }).eq('id', transaction.id);
+
+  await supabase.from('payment_verifications').insert({
+    transaction_id: transaction.id,
+    booking_id: transaction.booking_id,
+    gateway_provider: 'suvat_pay',
+    gateway_reference: referenceNumber || merchantReference,
+    verification_status: paymentStatus === 'completed' ? 'verified' : paymentStatus === 'failed' ? 'failed' : 'pending',
+    gateway_response: data,
+    verified_at: paymentStatus === 'pending' ? null : new Date().toISOString(),
+  });
+
+  if (paymentStatus === 'completed' && transaction.booking_id) {
+    await supabase.from('bookings').update({
+      payment_status: 'paid',
+      status: 'confirmed',
+      updated_at: new Date().toISOString(),
+    }).eq('id', transaction.booking_id);
+  }
+
+  return { paymentStatus, transactionFound: true, transactionId: transaction.id };
 }

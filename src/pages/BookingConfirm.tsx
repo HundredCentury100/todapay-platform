@@ -212,6 +212,77 @@ const BookingConfirm = () => {
     await handleConfirm(methodType, paymentData);
   };
 
+  const prepareTodaPayPayment = async () => {
+    if (bookingId) {
+      return {
+        bookingId,
+        merchantProfileId,
+        merchantReference: bookingId,
+        customer: {
+          email: bookingData.passengerEmail,
+          phoneNumber: bookingData.passengerPhone,
+          name: bookingData.passengerName,
+        },
+      };
+    }
+
+    setSaving(true);
+    const generatedTicketNumber = generateTicketNumber();
+    const pendingBookingData = { ...bookingData, reservationType: 'pending_payment' };
+    let data, error, ref;
+
+    if (bookingData.isAgentBooking && bookingData.agentProfileId) {
+      const agentBookingResult = await createAgentBooking(
+        { ...pendingBookingData, agentProfileId: bookingData.agentProfileId, agentCommissionRate: bookingData.agentCommissionRate, client: bookingData.agentClient },
+        generatedTicketNumber
+      );
+      data = agentBookingResult.data;
+      error = agentBookingResult.error;
+      ref = agentBookingResult.bookingReference;
+    } else {
+      const bookingResult = await createBooking(pendingBookingData, generatedTicketNumber);
+      data = bookingResult.data;
+      error = bookingResult.error;
+      ref = bookingResult.bookingReference;
+    }
+
+    if (error || !data?.id) {
+      setSaving(false);
+      throw new Error('Unable to prepare booking for payment');
+    }
+
+    if (bookingData.type === "bus" && bookingData.selectedSeatIds) {
+      await bookSeats(bookingData.scheduleId, bookingData.selectedSeatIds, data.id);
+    }
+
+    if (merchantProfileId) {
+      const feeData = await calculatePlatformFee(merchantProfileId, bookingData.totalPrice, data.id);
+      await createTransaction(data.id, merchantProfileId, bookingData.totalPrice, 'payment_gateway', feeData.feePercentage, feeData.feeAmount, {
+        gateway: 'suvat_pay',
+        bookedByAgentId: bookingData.agentProfileId,
+        agentCommissionDeducted: agentPaymentMethod === 'agent_retains',
+        agentRemittanceAmount,
+        agentPaymentMethod,
+      }, bookingData.serviceFee || 0);
+    }
+
+    setTicketNumber(generatedTicketNumber);
+    setBookingReference(ref || '');
+    setBookingId(data.id);
+    setSaving(false);
+
+    return {
+      bookingId: data.id,
+      merchantProfileId,
+      merchantReference: data.id,
+      customer: {
+        email: bookingData.passengerEmail,
+        phoneNumber: bookingData.passengerPhone,
+        name: bookingData.passengerName,
+      },
+    };
+  };
+
   const handleConfirm = async (methodType?: string, paymentData?: any) => {
     const isCashPayment = methodType === 'cash';
     const isCashReservation = bookingData.reservationType === 'cash_reserved' || isCashPayment;
@@ -863,7 +934,7 @@ const BookingConfirm = () => {
                 </motion.div>
               ) : paymentView === 'todapay' ? (
                 <motion.div key="todapay" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                  <TodaPayCheckout amount={totalAmount} reason={`${bookingData.itemName}${bookingData.from ? ` - ${bookingData.from} to ${bookingData.to}` : ''}`} bookingId={bookingId || undefined} merchantProfileId={merchantProfileId || undefined} onCancel={() => setPaymentView('select')} onPaymentComplete={(data) => handleConfirm('payment_gateway', data)} />
+                  <TodaPayCheckout amount={totalAmount} reason={`${bookingData.itemName}${bookingData.from ? ` - ${bookingData.from} to ${bookingData.to}` : ''}`} bookingId={bookingId || undefined} merchantProfileId={merchantProfileId || undefined} preparePayment={prepareTodaPayPayment} onCancel={() => setPaymentView('select')} onPaymentComplete={(data) => handleConfirm('payment_gateway', data)} />
                 </motion.div>
               ) : paymentView === 'omari' ? (
                 <motion.div key="omari" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
