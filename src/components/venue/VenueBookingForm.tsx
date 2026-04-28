@@ -153,9 +153,8 @@ const VenueBookingForm = ({ venue, selectedDate, onSuccess }: VenueBookingFormPr
           venue: venue.address,
           to: venue.city,
           numAttendees: formData.expected_guests,
-          preConfirmed: true,
-          bookingId: booking?.id,
-          bookingReference: booking?.booking_reference,
+          existingBookingId: booking?.id,
+          existingBookingReference: booking?.booking_reference,
         }
       });
 
