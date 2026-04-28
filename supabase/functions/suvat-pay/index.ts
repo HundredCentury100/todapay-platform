@@ -317,3 +317,92 @@ async function decryptPayload(data: string, key: string): Promise<string> {
 
   return new TextDecoder().decode(decrypted);
 }
+
+async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string): Promise<Record<string, any>> {
+  if (typeof body.payload === 'string') {
+    const decrypted = await decryptPayload(body.payload, encryptionKey);
+    return JSON.parse(decrypted);
+  }
+
+  return body as Record<string, any>;
+}
+
+function isPaidStatus(status: unknown): boolean {
+  return ['SUCCESS', 'PAID', 'COMPLETED', 'COMPLETE'].includes(String(status || '').toUpperCase());
+}
+
+function isFailedStatus(status: unknown): boolean {
+  return ['FAILED', 'CANCELLED', 'CANCELED', 'DECLINED', 'TIMEOUT', 'EXPIRED'].includes(String(status || '').toUpperCase());
+}
+
+function toTransactionStatus(status: unknown): 'completed' | 'failed' | 'pending' {
+  if (isPaidStatus(status)) return 'completed';
+  if (isFailedStatus(status)) return 'failed';
+  return 'pending';
+}
+
+async function findTransaction(supabase: any, referenceNumber?: string, merchantReference?: string) {
+  const selectFields = 'id, booking_id, merchant_profile_id, amount, payment_metadata';
+  const refs = [referenceNumber, merchantReference].filter(Boolean) as string[];
+
+  for (const ref of refs) {
+    const direct = await supabase.from('transactions').select(selectFields).eq('transaction_reference', ref).maybeSingle();
+    if (direct.data) return direct.data;
+
+    const byPesepay = await supabase.from('transactions').select(selectFields).eq('payment_metadata->>pesepay_reference', ref).maybeSingle();
+    if (byPesepay.data) return byPesepay.data;
+
+    const byMerchant = await supabase.from('transactions').select(selectFields).eq('payment_metadata->>merchant_reference', ref).maybeSingle();
+    if (byMerchant.data) return byMerchant.data;
+  }
+
+  return null;
+}
+
+async function syncPaymentStatus(supabase: any, data: Record<string, any>) {
+  const referenceNumber = data.referenceNumber || data.reference;
+  const merchantReference = data.merchantReference;
+  const paymentStatus = toTransactionStatus(data.transactionStatus);
+  const transaction = await findTransaction(supabase, referenceNumber, merchantReference);
+
+  if (!transaction) {
+    console.warn('No local transaction found for Pesepay result', { referenceNumber, merchantReference, status: data.transactionStatus });
+    return { paymentStatus, transactionFound: false };
+  }
+
+  const mergedMetadata = {
+    ...(transaction.payment_metadata || {}),
+    gateway: 'suvat_pay',
+    pesepay_reference: referenceNumber,
+    merchant_reference: merchantReference,
+    pesepay_status: data.transactionStatus,
+    pesepay_result: data,
+    synced_at: new Date().toISOString(),
+  };
+
+  await supabase.from('transactions').update({
+    payment_status: paymentStatus,
+    payment_metadata: mergedMetadata,
+    updated_at: new Date().toISOString(),
+  }).eq('id', transaction.id);
+
+  await supabase.from('payment_verifications').insert({
+    transaction_id: transaction.id,
+    booking_id: transaction.booking_id,
+    gateway_provider: 'suvat_pay',
+    gateway_reference: referenceNumber || merchantReference,
+    verification_status: paymentStatus === 'completed' ? 'verified' : paymentStatus === 'failed' ? 'failed' : 'pending',
+    gateway_response: data,
+    verified_at: paymentStatus === 'pending' ? null : new Date().toISOString(),
+  });
+
+  if (paymentStatus === 'completed' && transaction.booking_id) {
+    await supabase.from('bookings').update({
+      payment_status: 'paid',
+      status: 'confirmed',
+      updated_at: new Date().toISOString(),
+    }).eq('id', transaction.booking_id);
+  }
+
+  return { paymentStatus, transactionFound: true, transactionId: transaction.id };
+}
