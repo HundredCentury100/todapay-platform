@@ -210,12 +210,16 @@ serve(async (req) => {
 
         const data = JSON.parse(response.body);
 
+        const successStatuses = ['SUCCESS', 'PAID', 'COMPLETED'];
+        const isPaid = successStatuses.includes(String(data.transactionStatus || '').toUpperCase());
+
         return new Response(JSON.stringify({
           success: true,
-          paid: data.transactionStatus === 'SUCCESS',
+          paid: isPaid,
           status: data.transactionStatus,
           amount: data.amountDetails?.totalTransactionAmount,
           currency: data.amountDetails?.currencyCode,
+          raw: data,
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
