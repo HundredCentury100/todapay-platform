@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, XCircle, ArrowRight, Wallet } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, ArrowRight, Wallet, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
@@ -17,6 +17,7 @@ const PaymentCallback = () => {
   const [paymentType, setPaymentType] = useState<PaymentType>('unknown');
   const [topUpAmount, setTopUpAmount] = useState<number>(0);
   const [attempts, setAttempts] = useState(0);
+  const [paymentUrl, setPaymentUrl] = useState<string>('');
 
   useEffect(() => {
     checkPaymentStatus(0);
@@ -33,16 +34,22 @@ const PaymentCallback = () => {
       }
 
       const parsed = JSON.parse(storedRef);
-      const { referenceNumber, bookingId, type, walletId, userId, amount } = parsed;
+      const { referenceNumber, bookingId, type, walletId, userId, amount, paymentUrl: storedPaymentUrl } = parsed;
 
       if (!referenceNumber) {
         console.error('No referenceNumber in stored payment data:', parsed);
         setState('failed');
         return;
       }
-      
-      const detectedType: PaymentType = type === 'driver_wallet_topup' ? 'driver_wallet_topup' 
-        : type === 'wallet_topup' ? 'wallet_topup' 
+
+      // Store payment URL for the button
+      if (storedPaymentUrl && attemptNum === 0) {
+        setPaymentUrl(storedPaymentUrl);
+        console.log('💳 Payment URL available:', storedPaymentUrl);
+      }
+
+      const detectedType: PaymentType = type === 'driver_wallet_topup' ? 'driver_wallet_topup'
+        : type === 'wallet_topup' ? 'wallet_topup'
         : bookingId ? 'booking' : 'unknown';
       setPaymentType(detectedType);
       if (amount) setTopUpAmount(amount);
@@ -212,19 +219,31 @@ const PaymentCallback = () => {
                 <div>
                   <h2 className="text-xl font-bold">Complete Your Payment</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Please complete payment using your mobile money or banking app
+                    Click the button below to complete your payment
                   </p>
                 </div>
+
+                {paymentUrl && (
+                  <Button
+                    onClick={() => window.open(paymentUrl, '_blank')}
+                    className="w-full rounded-xl h-12 text-base font-semibold"
+                    size="lg"
+                  >
+                    Complete Payment
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+
                 <div className="bg-muted/50 rounded-xl p-4 text-left space-y-2">
-                  <p className="text-sm font-medium">Payment Instructions:</p>
+                  <p className="text-sm font-medium">Instructions:</p>
                   <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
-                    <li>Check your mobile money app for a payment prompt</li>
-                    <li>Authorize the payment in your app</li>
-                    <li>We'll automatically verify once payment is complete</li>
+                    <li>Click "Complete Payment" button above</li>
+                    <li>Complete the payment on the payment page</li>
+                    <li>Return to this app - we'll verify automatically</li>
                   </ol>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Checking payment status... (Attempt {attempts + 1})
+                  Auto-checking payment status... (Attempt {attempts + 1})
                 </p>
               </motion.div>
             )}

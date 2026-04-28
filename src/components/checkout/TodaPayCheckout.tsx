@@ -115,23 +115,25 @@ export function TodaPayCheckout({
 
       console.log('📋 Full Pesepay Initiate Response (formatted):', JSON.stringify(data, null, 2));
 
-      if (data?.referenceNumber) {
-        // Store payment reference for polling
+      if (data?.referenceNumber && data?.redirectUrl) {
+        // Store payment reference and URL for polling
         sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
           referenceNumber: data.referenceNumber,
           bookingId: finalBookingId,
           merchantProfileId: finalMerchantProfileId,
           amount,
+          paymentUrl: data.redirectUrl, // Store the payment URL
         }));
 
         console.log('✅ Payment initiated successfully, starting payment verification...');
         console.log('📌 Reference:', data.referenceNumber);
+        console.log('🔗 Payment URL:', data.redirectUrl);
         console.log('⏱️ Starting background polling for payment status...');
 
-        // Navigate directly to payment callback page which will start polling
+        // Navigate directly to payment callback page which will show URL and start polling
         window.location.href = '/payment/callback';
       } else {
-        throw new Error('No reference number received from payment gateway');
+        throw new Error('No reference number or payment URL received from payment gateway');
       }
     } catch (err: any) {
       console.error('Payment error:', err);
