@@ -156,7 +156,7 @@ serve(async (req) => {
 
     // Pesepay posts final results to resultUrl without our action wrapper.
     if (!action && (body.payload || body.referenceNumber || body.transactionStatus || body.reference || body.merchantReference)) {
-      const callbackData = await parsePesepayBody(body, encryptionKey);
+      const callbackData = await parsePesepayBody(body, encryptionKey, integrationKey);
       const syncResult = await syncPaymentStatus(supabase, callbackData);
 
       return new Response(JSON.stringify({ success: true, ...syncResult }), {
@@ -214,7 +214,7 @@ serve(async (req) => {
 
         let data;
         try {
-          data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+          data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
         } catch (parseErr) {
           console.error('Failed to parse response:', response.body.substring(0, 500));
           throw new Error('Invalid response from payment gateway');
@@ -274,7 +274,7 @@ serve(async (req) => {
             throw new Error(`Status check failed: ${response.status} - ${response.body.substring(0, 100)}`);
           }
 
-          const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+          const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey, integrationKey);
           console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
 
           await syncPaymentStatus(supabase, data);
@@ -349,10 +349,21 @@ function decryptPayload(data: string, key: string): string {
   return decrypted;
 }
 
-async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string): Promise<Record<string, any>> {
+async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string, fallbackKey?: string): Promise<Record<string, any>> {
   if (typeof body.payload === 'string') {
-    const decrypted = await decryptPayload(body.payload, encryptionKey);
-    return JSON.parse(decrypted);
+    const keysToTry = [encryptionKey, fallbackKey].filter(Boolean) as string[];
+    let lastError: unknown;
+
+    for (const key of keysToTry) {
+      try {
+        const decrypted = decryptPayload(body.payload, key);
+        return JSON.parse(decrypted);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('Decryption failed');
   }
 
   return body as Record<string, any>;
