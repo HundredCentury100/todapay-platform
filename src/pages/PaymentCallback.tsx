@@ -178,25 +178,40 @@ const PaymentCallback = () => {
     const isNative = Capacitor.isNativePlatform();
 
     if (isNative) {
-      // Android/iOS push notification
+      // Android/iOS local notification
       try {
+        // Check permissions first
+        const permStatus = await LocalNotifications.checkPermissions();
+        console.log('📱 Notification permission check:', permStatus);
+
+        if (permStatus.display !== 'granted') {
+          console.warn('⚠️ Notification permissions not granted, requesting...');
+          const result = await LocalNotifications.requestPermissions();
+          if (result.display !== 'granted') {
+            console.warn('⚠️ User denied notification permissions');
+            // Continue anyway, show UI success
+          }
+        }
+
+        // Schedule notification to show immediately
+        console.log('📱 Scheduling payment success notification...');
         await LocalNotifications.schedule({
           notifications: [
             {
-              title: '✅ Payment Successful!',
-              body: `Your payment of $${amount.toFixed(2)} was successful. Open the app to view details.`,
-              id: Date.now(),
-              schedule: { at: new Date(Date.now() + 1000) },
-              sound: 'default',
+              title: 'Payment Successful!',
+              body: `Your payment of $${amount.toFixed(2)} was completed successfully.`,
+              id: Math.floor(Math.random() * 100000),
+              schedule: { at: new Date(Date.now() + 100) }, // Show almost immediately
+              sound: undefined,
               attachments: undefined,
               actionTypeId: '',
               extra: { type: detectedType, amount, referenceNumber },
             },
           ],
         });
-        console.log('📱 Push notification scheduled');
+        console.log('✅ Push notification scheduled successfully');
       } catch (notifErr) {
-        console.warn('Failed to send push notification:', notifErr);
+        console.error('❌ Failed to send push notification:', notifErr);
       }
     } else {
       // Web toast notification

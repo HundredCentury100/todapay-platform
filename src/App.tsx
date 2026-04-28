@@ -11,6 +11,8 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 import { App as CapApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
@@ -390,6 +392,36 @@ const AppContent = () => {
       setShowSplash(false);
       setHasSeenSplash(true);
     }
+
+    // Request notification permissions on mobile
+    const requestNotificationPermissions = async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const permStatus = await LocalNotifications.checkPermissions();
+          console.log('📱 Notification permission status:', permStatus.display);
+
+          if (permStatus.display === 'prompt' || permStatus.display === 'prompt-with-rationale') {
+            console.log('📱 Requesting notification permissions...');
+            const result = await LocalNotifications.requestPermissions();
+            console.log('📱 Permission result:', result.display);
+
+            if (result.display === 'granted') {
+              console.log('✅ Notification permissions granted!');
+            } else {
+              console.warn('⚠️ Notification permissions denied');
+            }
+          } else if (permStatus.display === 'granted') {
+            console.log('✅ Notification permissions already granted');
+          } else {
+            console.warn('⚠️ Notification permissions denied previously');
+          }
+        } catch (error) {
+          console.error('❌ Error requesting notification permissions:', error);
+        }
+      }
+    };
+
+    requestNotificationPermissions();
   }, []);
 
   const handleSplashComplete = () => {
