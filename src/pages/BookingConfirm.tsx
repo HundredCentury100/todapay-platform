@@ -934,7 +934,7 @@ const BookingConfirm = () => {
                 </motion.div>
               ) : paymentView === 'todapay' ? (
                 <motion.div key="todapay" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                  <TodaPayCheckout amount={totalAmount} reason={`${bookingData.itemName}${bookingData.from ? ` - ${bookingData.from} to ${bookingData.to}` : ''}`} bookingId={bookingId || undefined} merchantProfileId={merchantProfileId || undefined} onCancel={() => setPaymentView('select')} onPaymentComplete={(data) => handleConfirm('payment_gateway', data)} />
+                  <TodaPayCheckout amount={totalAmount} reason={`${bookingData.itemName}${bookingData.from ? ` - ${bookingData.from} to ${bookingData.to}` : ''}`} bookingId={bookingId || undefined} merchantProfileId={merchantProfileId || undefined} preparePayment={prepareTodaPayPayment} onCancel={() => setPaymentView('select')} onPaymentComplete={(data) => handleConfirm('payment_gateway', data)} />
                 </motion.div>
               ) : paymentView === 'omari' ? (
                 <motion.div key="omari" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
