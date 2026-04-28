@@ -27,12 +27,19 @@ const PaymentCallback = () => {
     try {
       const storedRef = sessionStorage.getItem('suvat_pay_ref');
       if (!storedRef) {
+        console.error('No payment reference found in sessionStorage');
         setState('failed');
         return;
       }
 
       const parsed = JSON.parse(storedRef);
       const { referenceNumber, bookingId, type, walletId, userId, amount } = parsed;
+
+      if (!referenceNumber) {
+        console.error('No referenceNumber in stored payment data:', parsed);
+        setState('failed');
+        return;
+      }
       
       const detectedType: PaymentType = type === 'driver_wallet_topup' ? 'driver_wallet_topup' 
         : type === 'wallet_topup' ? 'wallet_topup' 
@@ -136,13 +143,28 @@ const PaymentCallback = () => {
       } else {
         setState('failed');
       }
-    } catch (err) {
-      console.error('Payment check error:', err);
+    } catch (err: any) {
+      console.error('Payment check error:', {
+        attempt: attemptNum,
+        error: err,
+        message: err?.message,
+        details: err?.details || err?.error_description,
+      });
+
+      // If it's a credentials/config error, fail immediately
+      if (err?.message?.includes('not configured') || err?.message?.includes('credentials')) {
+        console.error('Payment gateway configuration error - failing immediately');
+        setState('failed');
+        return;
+      }
+
       if (attemptNum < 5) {
+        console.log(`Retrying payment check in 3s (attempt ${attemptNum + 1}/5)`);
         setTimeout(() => {
           checkPaymentStatus(attemptNum + 1);
         }, 3000);
       } else {
+        console.error('Payment check failed after 5 attempts');
         setState('failed');
       }
     }

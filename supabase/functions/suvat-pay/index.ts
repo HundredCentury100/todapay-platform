@@ -121,8 +121,26 @@ serve(async (req) => {
     const integrationKey = (Deno.env.get('PESEPAY_INTEGRATION_KEY') ?? '').replace(/[^\x20-\x7E]/g, '').trim();
     const encryptionKey = (Deno.env.get('PESEPAY_ENCRYPTION_KEY') ?? '').replace(/[^\x20-\x7E]/g, '').trim();
 
+    console.log('Environment check:', {
+      hasIntegrationKey: !!integrationKey,
+      integrationKeyLength: integrationKey.length,
+      hasEncryptionKey: !!encryptionKey,
+      encryptionKeyLength: encryptionKey.length,
+      pesepayEnv: PESEPAY_ENV,
+    });
+
     if (!integrationKey || !encryptionKey) {
-      throw new Error('Payment gateway not configured');
+      console.error('Missing Pesepay credentials');
+      return new Response(JSON.stringify({
+        error: 'Payment gateway not configured - missing credentials',
+        details: {
+          hasIntegrationKey: !!integrationKey,
+          hasEncryptionKey: !!encryptionKey,
+        }
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const supabase = createClient(
@@ -226,35 +244,57 @@ serve(async (req) => {
       case 'check-status': {
         const { referenceNumber } = body;
 
-        const response = await pesepayRequest(
-          `/payments/check-payment?referenceNumber=${encodeURIComponent(referenceNumber)}`,
-          'GET',
-          undefined,
-          integrationKey
-        );
-
-        if (response.status < 200 || response.status >= 300) {
-          throw new Error(`Status check failed: ${response.status}`);
+        if (!referenceNumber) {
+          console.error('check-status called without referenceNumber');
+          return new Response(JSON.stringify({
+            error: 'Missing referenceNumber',
+            success: false,
+            paid: false,
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
 
-        const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
-        console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
+        console.log('Checking payment status for:', referenceNumber);
 
-        await syncPaymentStatus(supabase, data);
+        try {
+          const response = await pesepayRequest(
+            `/payments/check-payment?referenceNumber=${encodeURIComponent(referenceNumber)}`,
+            'GET',
+            undefined,
+            integrationKey
+          );
 
-        const isPaid = isPaidStatus(data.transactionStatus);
-        console.log('Payment isPaid check:', { status: data.transactionStatus, isPaid });
+          console.log('Pesepay check-payment response:', { status: response.status, bodyPreview: response.body.substring(0, 200) });
 
-        return new Response(JSON.stringify({
-          success: true,
-          paid: isPaid,
-          status: data.transactionStatus,
-          amount: data.amountDetails?.totalTransactionAmount,
-          currency: data.amountDetails?.currencyCode,
-          raw: data,
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+          if (response.status < 200 || response.status >= 300) {
+            console.error('Status check HTTP error:', response.status, response.body);
+            throw new Error(`Status check failed: ${response.status} - ${response.body.substring(0, 100)}`);
+          }
+
+          const data = await parsePesepayBody(JSON.parse(response.body), encryptionKey);
+          console.log('Payment status check:', { referenceNumber, status: data.transactionStatus, fullData: JSON.stringify(data).substring(0, 500) });
+
+          await syncPaymentStatus(supabase, data);
+
+          const isPaid = isPaidStatus(data.transactionStatus);
+          console.log('Payment isPaid check:', { status: data.transactionStatus, isPaid });
+
+          return new Response(JSON.stringify({
+            success: true,
+            paid: isPaid,
+            status: data.transactionStatus,
+            amount: data.amountDetails?.totalTransactionAmount,
+            currency: data.amountDetails?.currencyCode,
+            raw: data,
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch (checkError: any) {
+          console.error('check-status error:', checkError.message, checkError.stack);
+          throw checkError;
+        }
       }
 
       default:
