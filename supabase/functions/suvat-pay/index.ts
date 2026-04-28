@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import CryptoJS from "npm:crypto-js@4.2.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -313,53 +314,36 @@ serve(async (req) => {
   }
 });
 
-// AES-CBC encryption matching Pesepay's CryptoJS format
-// CryptoJS.enc.Utf8.parse(key) converts key to raw UTF-8 bytes
-// IV = first 16 chars of encryption key  
-// CryptoJS pads key to next valid AES size (16, 24, 32) with zeros
-function getKeyBytes(key: string): Uint8Array {
-  const encoder = new TextEncoder();
-  const rawBytes = encoder.encode(key);
-  // Pad to nearest valid AES key size
-  const validSizes = [16, 24, 32];
-  const targetSize = validSizes.find(s => s >= rawBytes.length) || 32;
-  const padded = new Uint8Array(targetSize);
-  padded.set(rawBytes.slice(0, targetSize));
-  return padded;
+// Pesepay's docs use CryptoJS AES-256-CBC with the first 16 key chars as IV.
+// Using CryptoJS here keeps encryption/decryption identical to their examples.
+function encryptPayload(data: string, key: string): string {
+  const keyBytes = CryptoJS.enc.Utf8.parse(key);
+  const ivBytes = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
+  const encrypted = CryptoJS.AES.encrypt(data, keyBytes, {
+    iv: ivBytes,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+
+  return encrypted.ciphertext.toString(CryptoJS.enc.Base64);
 }
 
-async function encryptPayload(data: string, key: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyBytes = getKeyBytes(key);
-  const ivBytes = encoder.encode(key.slice(0, 16));
-  
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw', keyBytes, { name: 'AES-CBC' }, false, ['encrypt']
-  );
+function decryptPayload(data: string, key: string): string {
+  const encryptedPayload = data.trim();
+  const keyBytes = CryptoJS.enc.Utf8.parse(key);
+  const ivBytes = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
+  const decryptedBytes = CryptoJS.AES.decrypt(encryptedPayload, keyBytes, {
+    iv: ivBytes,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+  const decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-CBC', iv: ivBytes }, cryptoKey, encoder.encode(data)
-  );
+  if (!decrypted) {
+    throw new Error('Decryption failed');
+  }
 
-  // CryptoJS .toString() outputs base64 of just the ciphertext
-  return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
-}
-
-async function decryptPayload(data: string, key: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyBytes = getKeyBytes(key);
-  const ivBytes = encoder.encode(key.slice(0, 16));
-  const encrypted = Uint8Array.from(atob(data), c => c.charCodeAt(0));
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw', keyBytes, { name: 'AES-CBC' }, false, ['decrypt']
-  );
-
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-CBC', iv: ivBytes }, cryptoKey, encrypted
-  );
-
-  return new TextDecoder().decode(decrypted);
+  return decrypted;
 }
 
 async function parsePesepayBody(body: Record<string, unknown>, encryptionKey: string): Promise<Record<string, any>> {
