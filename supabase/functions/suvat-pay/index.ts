@@ -7,9 +7,10 @@ const corsHeaders = {
 };
 
 // Pesepay environment switch — set PESEPAY_ENV=test for sandbox, anything else hits live.
-const PESEPAY_ENV = (Deno.env.get('PESEPAY_ENV') ?? 'live').toLowerCase();
-const PESEPAY_HOST = PESEPAY_ENV === 'test' ? 'api.test.sandbox.pesepay.com' : 'api.pesepay.com';
-const PESEPAY_BASE_PATH = PESEPAY_ENV === 'test' ? '/payments-engine/v1' : '/api/payments-engine/v1';
+// Switch to live by setting PESEPAY_ENV=live in secrets. Defaults to sandbox.
+const PESEPAY_ENV = (Deno.env.get('PESEPAY_ENV') ?? '').toLowerCase() === 'live' ? 'live' : 'test';
+const PESEPAY_HOST = PESEPAY_ENV === 'live' ? 'api.pesepay.com' : 'api.test.sandbox.pesepay.com';
+const PESEPAY_BASE_PATH = PESEPAY_ENV === 'live' ? '/api/payments-engine/v1' : '/payments-engine/v1';
 
 // Use Deno.connect with manual TLS to bypass hyper's HTTP header parsing
 async function pesepayRequest(path: string, method: string, body?: string, authKey?: string, timeoutMs = 15000): Promise<{ status: number; body: string }> {
