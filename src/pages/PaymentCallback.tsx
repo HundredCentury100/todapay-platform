@@ -210,11 +210,22 @@ const PaymentCallback = () => {
                   <Loader2 className="h-8 w-8 text-primary animate-spin" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Verifying Payment</h2>
+                  <h2 className="text-xl font-bold">Complete Your Payment</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Please wait while we confirm your payment...
+                    Please complete payment using your mobile money or banking app
                   </p>
                 </div>
+                <div className="bg-muted/50 rounded-xl p-4 text-left space-y-2">
+                  <p className="text-sm font-medium">Payment Instructions:</p>
+                  <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                    <li>Check your mobile money app for a payment prompt</li>
+                    <li>Authorize the payment in your app</li>
+                    <li>We'll automatically verify once payment is complete</li>
+                  </ol>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Checking payment status... (Attempt {attempts + 1})
+                </p>
               </motion.div>
             )}
 

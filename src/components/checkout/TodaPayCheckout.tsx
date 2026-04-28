@@ -115,8 +115,8 @@ export function TodaPayCheckout({
 
       console.log('📋 Full Pesepay Initiate Response (formatted):', JSON.stringify(data, null, 2));
 
-      if (data?.redirectUrl) {
-        // Store payment reference for callback
+      if (data?.referenceNumber) {
+        // Store payment reference for polling
         sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
           referenceNumber: data.referenceNumber,
           bookingId: finalBookingId,
@@ -124,34 +124,14 @@ export function TodaPayCheckout({
           amount,
         }));
 
-        console.log('✅ Payment initiated successfully, redirecting to Pesepay...');
-        console.log('🔗 Redirect URL:', data.redirectUrl);
+        console.log('✅ Payment initiated successfully, starting payment verification...');
         console.log('📌 Reference:', data.referenceNumber);
+        console.log('⏱️ Starting background polling for payment status...');
 
-        const isNative = Capacitor.isNativePlatform();
-
-        if (isNative) {
-          // Open payment in in-app browser on mobile
-          console.log('📱 Opening payment in in-app browser...');
-
-          await Browser.open({
-            url: data.redirectUrl,
-            presentationStyle: 'popover',
-            toolbarColor: '#1c1fcf',
-          });
-
-          // Listen for browser close
-          Browser.addListener('browserFinished', () => {
-            console.log('🔙 Browser closed, navigating to payment callback...');
-            // Navigate to callback page to check payment status
-            window.location.href = '/payment/callback';
-          });
-        } else {
-          // Redirect to payment page in web browser
-          window.location.href = data.redirectUrl;
-        }
+        // Navigate directly to payment callback page which will start polling
+        window.location.href = '/payment/callback';
       } else {
-        throw new Error('No redirect URL received');
+        throw new Error('No reference number received from payment gateway');
       }
     } catch (err: any) {
       console.error('Payment error:', err);
