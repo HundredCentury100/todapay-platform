@@ -172,6 +172,25 @@ const EventDetails = () => {
     }
   }, [id]);
 
+  // Detect whether the selected tier uses assigned seating.
+  // If no seats are seeded for the tier, fall back to General Admission (quantity selector).
+  useEffect(() => {
+    const detectSeats = async () => {
+      if (!event?.id || !selectedTier?.id) return;
+      const { count, error } = await supabase
+        .from("event_seats")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event.id)
+        .eq("ticket_tier_id", selectedTier.id);
+      if (!error) {
+        setHasSeats((count ?? 0) > 0);
+      } else {
+        setHasSeats(false);
+      }
+    };
+    detectSeats();
+  }, [event?.id, selectedTier?.id]);
+
   const fetchEventData = async () => {
     if (!id) return;
     
