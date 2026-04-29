@@ -6880,6 +6880,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_otp_codes: {
+        Row: {
+          attempts: number
+          code: string
+          created_at: string
+          email: string | null
+          expires_at: string
+          id: string
+          phone: string
+          purpose: string
+          verified: boolean
+        }
+        Insert: {
+          attempts?: number
+          code: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          phone: string
+          purpose?: string
+          verified?: boolean
+        }
+        Update: {
+          attempts?: number
+          code?: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          phone?: string
+          purpose?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       split_bill_participants: {
         Row: {
           amount_owed: number
