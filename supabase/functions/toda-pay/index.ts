@@ -50,7 +50,7 @@ async function pesepayRequest(path: string, method: string, body?: string, authK
     return new Promise<string>(async (resolve, reject) => {
       const timer = setTimeout(() => {
         try { conn.close(); } catch { /* ignore */ }
-        reject(new Error(`Suvat Pay request timed out after ${timeoutMs / 1000}s`));
+        reject(new Error(`TodaPay request timed out after ${timeoutMs / 1000}s`));
       }, timeoutMs);
 
       try {
@@ -176,7 +176,7 @@ serve(async (req) => {
         const selectedPaymentMethodCode = paymentMethodCode
           || (paymentChannel === 'mobile_money' ? 'PZW211' : Deno.env.get('PESEPAY_DEFAULT_PAYMENT_METHOD_CODE') || 'PZW212');
         const customerPhone = String(customer?.phoneNumber || customer?.phone || body.customerPhoneNumber || '0770000000');
-        const pesepayResultUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/suvat-pay`;
+        const pesepayResultUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/toda-pay`;
         const safeMerchantReference = String(merchantReference || bookingId || crypto.randomUUID());
 
         const transactionDetails = {
@@ -185,7 +185,7 @@ serve(async (req) => {
             currencyCode: currencyCode || 'USD',
           },
           merchantReference: safeMerchantReference,
-          reasonForPayment: reason || 'Suvat Pay - Booking Payment',
+          reasonForPayment: reason || 'TodaPay - Booking Payment',
           resultUrl: pesepayResultUrl,
           returnUrl: returnUrl,
           paymentMethodCode: selectedPaymentMethodCode,
@@ -231,7 +231,7 @@ serve(async (req) => {
         if (bookingId && merchantProfileId) {
           await supabase.from('transactions').update({
             payment_metadata: {
-              gateway: 'suvat_pay',
+              gateway: 'toda_pay',
               pesepay_reference: data.referenceNumber,
               merchant_reference: safeMerchantReference,
               poll_url: data.pollUrl,
@@ -341,7 +341,7 @@ serve(async (req) => {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Suvat Pay error:', errorMessage);
+    console.error('TodaPay error:', errorMessage);
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -455,7 +455,7 @@ async function syncPaymentStatus(supabase: any, data: Record<string, any>) {
       if (booking) {
         await supabase.from('payment_verifications').insert({
           booking_id: booking.id,
-          gateway_provider: 'suvat_pay',
+          gateway_provider: 'toda_pay',
           gateway_reference: referenceNumber || merchantReference,
           verification_status: paymentStatus === 'completed' ? 'verified' : paymentStatus === 'failed' ? 'failed' : 'pending',
           gateway_response: data,
@@ -472,7 +472,7 @@ async function syncPaymentStatus(supabase: any, data: Record<string, any>) {
 
   const mergedMetadata = {
     ...(transaction.payment_metadata || {}),
-    gateway: 'suvat_pay',
+    gateway: 'toda_pay',
     pesepay_reference: referenceNumber,
     merchant_reference: merchantReference,
     pesepay_status: data.transactionStatus,
@@ -489,7 +489,7 @@ async function syncPaymentStatus(supabase: any, data: Record<string, any>) {
   await supabase.from('payment_verifications').insert({
     transaction_id: transaction.id,
     booking_id: transaction.booking_id,
-    gateway_provider: 'suvat_pay',
+    gateway_provider: 'toda_pay',
     gateway_reference: referenceNumber || merchantReference,
     verification_status: paymentStatus === 'completed' ? 'verified' : paymentStatus === 'failed' ? 'failed' : 'pending',
     gateway_response: data,
