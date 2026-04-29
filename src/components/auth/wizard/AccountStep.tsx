@@ -27,32 +27,10 @@ export const AccountStep = ({
     <div className="space-y-5">
       <div className="text-center">
         <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-        <p className="text-muted-foreground text-sm mt-1">Enter your details to get started</p>
+        <p className="text-muted-foreground text-sm mt-1">Enter your details to get started with SMS verification</p>
       </div>
 
-      {/* Auth Method Toggle */}
-      <div className="flex gap-1 p-1 bg-muted/60 rounded-2xl backdrop-blur-sm">
-        <button type="button" onClick={() => setAuthMethod("email")}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all",
-            authMethod === "email"
-              ? "bg-background text-foreground shadow-sm border border-border/50"
-              : "text-muted-foreground hover:text-foreground"
-          )}>
-          <Mail className="h-4 w-4" /> Email
-        </button>
-        <button type="button" onClick={() => setAuthMethod("phone")}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all",
-            authMethod === "phone"
-              ? "bg-background text-foreground shadow-sm border border-border/50"
-              : "text-muted-foreground hover:text-foreground"
-          )}>
-          <Phone className="h-4 w-4" /> Phone
-        </button>
-      </div>
-
-      {/* Fields */}
+      {/* Fields - Always collect all for SMS OTP signup */}
       <div className="space-y-4">
         <ValidatedInput
           id="name" type="text" label="Full Name"
@@ -63,39 +41,34 @@ export const AccountStep = ({
           placeholder="John Doe" required
           className="h-14 rounded-2xl bg-card border-border"
         />
-        {authMethod === "phone" ? (
-          <ValidatedInput
-            id="phone" type="tel" label="Phone Number"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            onBlur={() => { setTouched({ ...touched, phone: true }); validateForm(); }}
-            error={errors.phone} touched={touched.phone}
-            placeholder="+263 7X XXX XXXX" required
-            className="h-14 rounded-2xl bg-card border-border"
-          />
-        ) : (
-          <>
-            <ValidatedInput
-              id="email" type="email" label="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              onBlur={() => { setTouched({ ...touched, email: true }); validateForm(); }}
-              error={errors.email} touched={touched.email}
-              placeholder="you@example.com" required
-              className="h-14 rounded-2xl bg-card border-border"
-            />
-            <ValidatedInput
-              id="password" type="password" label="Password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              onBlur={() => { setTouched({ ...touched, password: true }); validateForm(); }}
-              error={errors.password} touched={touched.password}
-              placeholder="••••••••" required
-              className="h-14 rounded-2xl bg-card border-border"
-            />
-            <PasswordStrengthIndicator password={formData.password} />
-          </>
-        )}
+        <ValidatedInput
+          id="email" type="email" label="Email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onBlur={() => { setTouched({ ...touched, email: true }); validateForm(); }}
+          error={errors.email} touched={touched.email}
+          placeholder="you@example.com" required
+          className="h-14 rounded-2xl bg-card border-border"
+        />
+        <ValidatedInput
+          id="phone" type="tel" label="Phone Number"
+          value={formData.phone}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          onBlur={() => { setTouched({ ...touched, phone: true }); validateForm(); }}
+          error={errors.phone} touched={touched.phone}
+          placeholder="263712345678" required
+          className="h-14 rounded-2xl bg-card border-border"
+        />
+        <ValidatedInput
+          id="password" type="password" label="Password"
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          onBlur={() => { setTouched({ ...touched, password: true }); validateForm(); }}
+          error={errors.password} touched={touched.password}
+          placeholder="••••••••" required
+          className="h-14 rounded-2xl bg-card border-border"
+        />
+        <PasswordStrengthIndicator password={formData.password} />
       </div>
 
       <p className="text-xs text-muted-foreground text-center leading-relaxed">

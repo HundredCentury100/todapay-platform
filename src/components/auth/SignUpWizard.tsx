@@ -20,10 +20,10 @@ import { CompletionStep } from "./wizard/CompletionStep";
 import type { AuthMethod } from "./useAuthFlow";
 
 const STEPS_BY_ROLE: Record<WizardRole, string[]> = {
-  consumer: ["role", "account", "complete"],
-  driver: ["role", "account", "details", "complete"],
-  merchant: ["role", "account", "details", "complete"],
-  agent: ["role", "account", "details", "complete"],
+  consumer: ["role", "account", "otp-verify", "complete"],
+  driver: ["role", "account", "otp-verify", "details", "complete"],
+  merchant: ["role", "account", "otp-verify", "details", "complete"],
+  agent: ["role", "account", "otp-verify", "details", "complete"],
 };
 
 interface SignUpWizardProps {
@@ -48,6 +48,8 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [verificationId, setVerificationId] = useState<number | null>(null);
+  const [otpCode, setOtpCode] = useState("");
 
   const steps = selectedRole ? STEPS_BY_ROLE[selectedRole] : ["role", "account", "complete"];
   const currentStep = steps[currentStepIndex];
@@ -56,24 +58,25 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
 
   const validateForm = () => {
     try {
-      if (authMethod === "phone") {
-        const errs: Record<string, string> = {};
-        if (!formData.phone || formData.phone.length < 10) errs.phone = "Please enter a valid phone number";
-        if (!formData.name) errs.name = "Name is required";
-        setErrors(errs);
-        return Object.keys(errs).length === 0;
+      const errs: Record<string, string> = {};
+
+      // Validate all fields for SMS OTP signup
+      if (!formData.name || formData.name.trim().length < 2) {
+        errs.name = "Name must be at least 2 characters";
       }
-      signUpSchema.parse(formData);
-      setErrors({});
-      return true;
+      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errs.email = "Please enter a valid email";
+      }
+      if (!formData.phone || formData.phone.replace(/\D/g, '').length < 10) {
+        errs.phone = "Please enter a valid phone number (min 10 digits)";
+      }
+      if (!formData.password || formData.password.length < 8) {
+        errs.password = "Password must be at least 8 characters";
+      }
+
+      setErrors(errs);
+      return Object.keys(errs).length === 0;
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) newErrors[err.path[0] as string] = err.message;
-        });
-        setErrors(newErrors);
-      }
       return false;
     }
   };
@@ -127,7 +130,7 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
     }
   };
 
-  const handleCreateAccount = async (): Promise<boolean> => {
+  const handleSendOTP = async (): Promise<boolean> => {
     setTouched({ email: true, password: true, name: true, phone: true });
     if (!validateForm()) {
       toast({ title: "Please check your details", variant: "destructive" });
@@ -136,28 +139,91 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
 
     setLoading(true);
     try {
-      if (authMethod === "phone") {
-        const { error } = await supabase.auth.signInWithOtp({
-          phone: formData.phone,
-          options: { data: { full_name: formData.name } },
-        });
-        if (error) {
-          toast({ title: "Error", description: getFriendlyAuthError(error), variant: "destructive" });
-          return false;
-        }
-        toast({ title: "Code Sent", description: "Check your phone for the OTP code." });
-        return true;
-      }
+      // Send OTP via BlueDotSMS
+      const { data, error } = await supabase.functions.invoke('send-sms-otp', {
+        body: {
+          action: 'send',
+          phoneNumber: formData.phone,
+          brand: 'TodaPay',
+        },
+      });
 
-      const { error } = await signUp(formData.email, formData.password, formData.name);
-      if (error) {
-        toast({ title: "Sign Up Failed", description: getFriendlyAuthError(error), variant: "destructive" });
+      if (error || !data?.success) {
+        toast({
+          title: "Failed to send OTP",
+          description: data?.error || error?.message || "Please try again",
+          variant: "destructive"
+        });
         return false;
       }
+
+      setVerificationId(data.verificationId);
+      toast({
+        title: "OTP Sent",
+        description: `Verification code sent to ${formData.phone}`
+      });
+      return true;
+    } catch (err: any) {
+      console.error('Send OTP error:', err);
+      toast({
+        title: "Error",
+        description: err?.message || "Failed to send OTP. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (): Promise<boolean> => {
+    if (!verificationId || !otpCode) {
+      toast({ title: "Please enter the verification code", variant: "destructive" });
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      // Verify OTP via BlueDotSMS
+      const { data, error } = await supabase.functions.invoke('send-sms-otp', {
+        body: {
+          action: 'verify',
+          phoneNumber: formData.phone,
+          verificationId,
+          verificationCode: otpCode,
+        },
+      });
+
+      if (error || !data?.verified) {
+        toast({
+          title: "Invalid Code",
+          description: data?.error || "Please check the code and try again",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      // OTP verified, now create the Supabase account
+      const { error: signUpError } = await signUp(formData.email, formData.password, formData.name, formData.phone);
+      if (signUpError) {
+        toast({
+          title: "Sign Up Failed",
+          description: getFriendlyAuthError(signUpError),
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      toast({ title: "Account Created", description: "Your phone number is verified!" });
       if (canInstall) triggerInstall();
       return true;
-    } catch (err) {
-      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+    } catch (err: any) {
+      console.error('Verify OTP error:', err);
+      toast({
+        title: "Error",
+        description: err?.message || "Verification failed. Please try again.",
+        variant: "destructive"
+        });
       return false;
     } finally {
       setLoading(false);
@@ -182,7 +248,14 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
       }
       setCurrentStepIndex(1);
     } else if (currentStep === "account") {
-      const success = await handleCreateAccount();
+      // Send OTP to user's phone
+      const success = await handleSendOTP();
+      if (!success) return;
+      // Move to OTP verification step
+      setCurrentStepIndex(currentStepIndex + 1);
+    } else if (currentStep === "otp-verify") {
+      // Verify OTP and create account
+      const success = await handleVerifyOTP();
       if (!success) return;
 
       // Consumer has no details step — finalize immediately
@@ -192,7 +265,7 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
         setLoading(false);
       } else {
         // Has details step — move to it
-        setCurrentStepIndex(2);
+        setCurrentStepIndex(currentStepIndex + 1);
       }
     } else if (currentStep === "details") {
       if (!validateRoleDetails()) {
@@ -283,6 +356,42 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
               onGoogleSignIn={handleGoogleSignIn}
             />
           )}
+          {currentStep === "otp-verify" && (
+            <div className="space-y-5">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold tracking-tight">Verify your phone</h1>
+                <p className="text-muted-foreground text-sm mt-1">
+                  We sent a verification code to <strong>{formData.phone}</strong>
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-medium mb-2">
+                    Verification Code
+                  </label>
+                  <input
+                    id="otp"
+                    type="text"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Enter 6-digit code"
+                    className="w-full h-14 rounded-2xl bg-card border-border border px-4 text-center text-2xl font-bold tracking-widest"
+                    autoFocus
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleSendOTP}
+                  disabled={loading}
+                  className="w-full text-sm"
+                >
+                  Didn't receive code? Resend
+                </Button>
+              </div>
+            </div>
+          )}
           {currentStep === "details" && selectedRole && (
             <RoleDetailsStep role={selectedRole} data={roleDetails} onChange={setRoleDetails} />
           )}
@@ -318,7 +427,9 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                {currentStep === "account" ? (authMethod === "phone" ? "Send Code" : "Create Account") : "Continue"}
+                {currentStep === "account" ? "Send Verification Code" :
+                 currentStep === "otp-verify" ? "Verify & Create Account" :
+                 "Continue"}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </>
             )}
