@@ -16,9 +16,15 @@ const BLUEDOT_SENDER_ID = Deno.env.get('BLUEDOT_SENDER_ID') || 'TODA';
 const BLUEDOT_BASE_URL = 'https://rest.bluedotsms.com/api';
 
 interface Body {
-  identifier: string; // email or phone
+  identifier: string;
   password: string;
   brand?: string;
+}
+
+function generate6DigitCode(): string {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return (buf[0] % 1_000_000).toString().padStart(6, '0');
 }
 
 serve(async (req) => {
@@ -36,7 +42,6 @@ serve(async (req) => {
     const isEmail = identifier.includes('@');
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Find the user's email + phone from profiles
     let email: string | null = null;
     let phone: string | null = null;
 
@@ -49,7 +54,6 @@ serve(async (req) => {
         .maybeSingle();
       phone = profile?.phone || null;
     } else {
-      // Look up by phone
       const cleanPhone = identifier.replace(/[\s\-]/g, '');
       const { data: profile } = await admin
         .from('profiles')
@@ -65,7 +69,6 @@ serve(async (req) => {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
     if (!phone) {
       return new Response(JSON.stringify({ error: 'No phone number on file. Please contact support.' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -82,10 +85,8 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    // Sign out the throwaway session immediately (defensive)
     await anon.auth.signOut();
 
-    // Send OTP via BlueDotSMS
     if (!BLUEDOT_API_ID || !BLUEDOT_API_PASSWORD) {
       return new Response(JSON.stringify({ error: 'SMS service not configured' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -93,33 +94,51 @@ serve(async (req) => {
     }
 
     const cleanPhoneNumber = phone.replace(/[\s\-\+]/g, '');
-    const verifyParams = new URLSearchParams({
+    const code = generate6DigitCode();
+
+    const { error: insertErr } = await admin.from('sms_otp_codes').insert({
+      phone: cleanPhoneNumber,
+      code,
+      purpose: 'signin',
+      email,
+    });
+    if (insertErr) {
+      console.error('Failed to store OTP:', insertErr);
+      return new Response(JSON.stringify({ error: 'Failed to issue code' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const message = `Your ${brand} sign-in code is ${code}. Expires in 10 minutes. Do not share this code.`;
+    const sendParams = new URLSearchParams({
       api_id: BLUEDOT_API_ID,
       api_password: BLUEDOT_API_PASSWORD,
-      brand,
+      sms_type: 'T',
+      encoding: 'T',
       sender_id: BLUEDOT_SENDER_ID,
       phonenumber: cleanPhoneNumber,
+      textmessage: message,
     });
 
-    const response = await fetch(`${BLUEDOT_BASE_URL}/Verify?${verifyParams.toString()}`);
+    const response = await fetch(`${BLUEDOT_BASE_URL}/SendSMS?${sendParams.toString()}`);
     const data = await response.json();
-    console.log('BlueDotSMS Send Response:', data);
+    console.log('BlueDotSMS SendSMS Response:', data);
 
     if (data.status !== 'S') {
-      return new Response(JSON.stringify({ error: data.remarks || 'Failed to send OTP' }), {
+      return new Response(JSON.stringify({ error: data.remarks || 'Failed to send SMS' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Mask phone for display
     const maskedPhone = cleanPhoneNumber.length > 4
       ? `${cleanPhoneNumber.slice(0, 4)}****${cleanPhoneNumber.slice(-2)}`
       : cleanPhoneNumber;
 
     return new Response(JSON.stringify({
       success: true,
-      verificationId: data.verfication_id,
-      email, // client uses this to call signInWithPassword after OTP verify
+      verificationId: data.message_id || 0,
+      email,
+      phone: cleanPhoneNumber,
       maskedPhone,
     }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error: unknown) {
