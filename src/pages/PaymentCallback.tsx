@@ -76,14 +76,6 @@ const PaymentCallback = () => {
 
       console.log('Full Pesepay Response (formatted):', JSON.stringify(data, null, 2));
 
-      // 🧪 TESTING MODE: Auto-succeed after 5 seconds (2nd attempt)
-      const TESTING_MODE = true; // Set to false for production
-      if (TESTING_MODE && attemptNum >= 1) {
-        console.log('🧪 TESTING MODE: Auto-marking payment as successful');
-        await handlePaymentSuccess(detectedType, walletId, userId, amount, referenceNumber, bookingId);
-        return;
-      }
-
       if (data?.paid) {
         sessionStorage.removeItem('toda_pay_ref');
         await handlePaymentSuccess(detectedType, walletId, userId, amount, referenceNumber, bookingId);
