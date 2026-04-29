@@ -45,6 +45,7 @@ serve(async (req) => {
     let email: string | null = null;
     let phone: string | null = null;
 
+    // Step 1: Look up the account by email or phone
     if (isEmail) {
       email = identifier.trim().toLowerCase();
       const { data: profile } = await admin
@@ -52,7 +53,16 @@ serve(async (req) => {
         .select('phone, email')
         .eq('email', email)
         .maybeSingle();
-      phone = profile?.phone || null;
+
+      if (!profile) {
+        return new Response(JSON.stringify({
+          error: 'No account found with this email. Please sign up first.'
+        }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      phone = profile.phone || null;
     } else {
       const cleanPhone = identifier.replace(/[\s\-]/g, '');
       const { data: profile } = await admin
@@ -60,35 +70,69 @@ serve(async (req) => {
         .select('phone, email')
         .or(`phone.eq.${cleanPhone},phone.eq.${cleanPhone.replace(/^\+/, '')}`)
         .maybeSingle();
-      email = profile?.email || null;
-      phone = profile?.phone || cleanPhone;
+
+      if (!profile) {
+        return new Response(JSON.stringify({
+          error: 'No account found with this phone number. Please sign up first.'
+        }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      email = profile.email || null;
+      phone = profile.phone || cleanPhone;
     }
 
+    // Step 2: Ensure account has both email and phone
     if (!email) {
-      return new Response(JSON.stringify({ error: 'Account not found' }), {
-        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      return new Response(JSON.stringify({
+        error: 'Account setup incomplete. Please contact support.'
+      }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     if (!phone) {
-      return new Response(JSON.stringify({ error: 'No phone number on file. Please contact support.' }), {
+      return new Response(JSON.stringify({
+        error: 'No phone number registered with your account. Please update your profile or contact support.'
+      }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Validate password using anon client (does not affect calling session)
+    // Step 3: Validate password
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { error: pwErr } = await anon.auth.signInWithPassword({ email, password });
     if (pwErr) {
-      return new Response(JSON.stringify({ error: 'Invalid email/phone or password' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      // Check if it's an invalid credentials error or something else
+      if (pwErr.message?.includes('Invalid login credentials')) {
+        return new Response(JSON.stringify({
+          error: 'Incorrect password. Please try again or reset your password.'
+        }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else if (pwErr.message?.includes('Email not confirmed')) {
+        return new Response(JSON.stringify({
+          error: 'Please verify your email address before signing in.'
+        }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else {
+        return new Response(JSON.stringify({
+          error: pwErr.message || 'Authentication failed. Please try again.'
+        }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
     await anon.auth.signOut();
 
+    // Step 4: Check SMS service configuration
     if (!BLUEDOT_API_ID || !BLUEDOT_API_PASSWORD) {
-      return new Response(JSON.stringify({ error: 'SMS service not configured' }), {
+      return new Response(JSON.stringify({
+        error: 'SMS verification is temporarily unavailable. Please try again later or contact support.'
+      }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -96,6 +140,7 @@ serve(async (req) => {
     const cleanPhoneNumber = phone.replace(/[\s\-\+]/g, '');
     const code = generate6DigitCode();
 
+    // Step 5: Store OTP code in database
     const { error: insertErr } = await admin.from('sms_otp_codes').insert({
       phone: cleanPhoneNumber,
       code,
@@ -104,11 +149,14 @@ serve(async (req) => {
     });
     if (insertErr) {
       console.error('Failed to store OTP:', insertErr);
-      return new Response(JSON.stringify({ error: 'Failed to issue code' }), {
+      return new Response(JSON.stringify({
+        error: 'Unable to generate verification code. Please try again in a moment.'
+      }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    // Step 6: Send SMS via BlueDotSMS
     const message = `Your ${brand} sign-in code is ${code}. Expires in 10 minutes. Do not share this code.`;
     const sendParams = new URLSearchParams({
       api_id: BLUEDOT_API_ID,
@@ -125,7 +173,11 @@ serve(async (req) => {
     console.log('BlueDotSMS SendSMS Response:', data);
 
     if (data.status !== 'S') {
-      return new Response(JSON.stringify({ error: data.remarks || 'Failed to send SMS' }), {
+      const errorMsg = data.remarks || 'Failed to send SMS';
+      console.error('BlueDotSMS error:', errorMsg);
+      return new Response(JSON.stringify({
+        error: `Unable to send verification code: ${errorMsg}. Please check your phone number or try again later.`
+      }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
