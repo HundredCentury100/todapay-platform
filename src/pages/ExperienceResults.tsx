@@ -254,8 +254,8 @@ const ExperienceResults = () => {
         </div>
 
         {/* Category Emoji Chips */}
-        <ScrollArea className="w-full">
-          <div className="flex gap-2 px-4 py-3">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="inline-flex gap-2 px-4 py-3 min-w-full">
             {EXPERIENCE_CATEGORIES.map((cat) => {
               const emoji = CATEGORY_EMOJIS[cat.id] || '🎯';
               const isSelected = selectedTypes.includes(cat.id as ExperienceType);
@@ -276,12 +276,12 @@ const ExperienceResults = () => {
               );
             })}
           </div>
-          <ScrollBar orientation="horizontal" className="h-1" />
+          <ScrollBar orientation="horizontal" className="h-2" />
         </ScrollArea>
 
         {/* Quick Date Filters */}
-        <ScrollArea className="w-full">
-          <div className="flex gap-2 px-4 pb-2">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="inline-flex gap-2 px-4 pb-2 min-w-full">
             {DATE_FILTERS.map((df) => (
               <button
                 key={df.value}
@@ -297,12 +297,12 @@ const ExperienceResults = () => {
               </button>
             ))}
           </div>
-          <ScrollBar orientation="horizontal" className="h-1" />
+          <ScrollBar orientation="horizontal" className="h-2" />
         </ScrollArea>
 
         {/* Sort Pills */}
-        <ScrollArea className="w-full">
-          <div className="flex items-center gap-2 px-4 pb-3">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="inline-flex items-center gap-2 px-4 pb-3 min-w-full">
             <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             {SORT_OPTIONS.map((opt) => (
               <button
@@ -319,7 +319,7 @@ const ExperienceResults = () => {
               </button>
             ))}
           </div>
-          <ScrollBar orientation="horizontal" className="h-1" />
+          <ScrollBar orientation="horizontal" className="h-2" />
         </ScrollArea>
 
         {/* Results */}

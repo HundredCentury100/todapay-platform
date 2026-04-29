@@ -234,14 +234,14 @@ const EventResults = () => {
         </div>
 
         {/* Category Emoji Chips */}
-        <div className="px-4 pb-2 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="inline-flex gap-2 px-4 pb-2 min-w-full">
             {categoryChips.map((chip) => (
               <button
                 key={chip.value}
                 onClick={() => setSelectedCategory(chip.value)}
                 className={cn(
-                  "h-9 px-4 rounded-full text-sm font-medium whitespace-nowrap transition-all press-effect flex items-center gap-1.5",
+                  "h-9 px-4 rounded-full text-sm font-medium whitespace-nowrap transition-all press-effect flex items-center gap-1.5 flex-shrink-0",
                   selectedCategory === chip.value
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "bg-secondary text-secondary-foreground"
@@ -252,17 +252,18 @@ const EventResults = () => {
               </button>
             ))}
           </div>
-        </div>
+          <ScrollBar orientation="horizontal" className="h-2" />
+        </ScrollArea>
 
         {/* Quick Date Filters */}
-        <div className="px-4 pb-2 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="inline-flex gap-2 px-4 pb-2 min-w-full">
             {dateFilters.map((df) => (
               <button
                 key={df.value}
                 onClick={() => setDateFilter(df.value)}
                 className={cn(
-                  "h-8 px-3.5 rounded-full text-xs font-medium whitespace-nowrap transition-all press-effect",
+                  "h-8 px-3.5 rounded-full text-xs font-medium whitespace-nowrap transition-all press-effect flex-shrink-0",
                   dateFilter === df.value
                     ? "bg-accent text-accent-foreground border border-primary/30"
                     : "bg-muted text-muted-foreground"
@@ -272,7 +273,8 @@ const EventResults = () => {
               </button>
             ))}
           </div>
-        </div>
+          <ScrollBar orientation="horizontal" className="h-2" />
+        </ScrollArea>
 
         {/* Season/League Filter */}
         <SeasonFilter
@@ -282,14 +284,14 @@ const EventResults = () => {
         />
 
         {/* Sort Pills */}
-        <div className="px-4 pb-3 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="inline-flex gap-2 px-4 pb-3 min-w-full">
             {sortOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setSortBy(option.value)}
                 className={cn(
-                  "h-10 px-5 rounded-full text-sm font-medium whitespace-nowrap transition-all tap-target press-effect",
+                  "h-10 px-5 rounded-full text-sm font-medium whitespace-nowrap transition-all tap-target press-effect flex-shrink-0",
                   sortBy === option.value
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "bg-secondary text-secondary-foreground"
@@ -299,7 +301,8 @@ const EventResults = () => {
               </button>
             ))}
           </div>
-        </div>
+          <ScrollBar orientation="horizontal" className="h-2" />
+        </ScrollArea>
       </header>
 
       {/* Map View */}
