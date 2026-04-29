@@ -124,6 +124,8 @@ export const WorkspaceBookingForm = ({ workspace }: WorkspaceBookingFormProps) =
         numAttendees: attendees,
         equipment: selectedEquipment,
         catering: [],
+        merchantProfileId: workspace.merchant_profile_id || null,
+        operator: workspace.name,
       },
     });
   };
