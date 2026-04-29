@@ -319,6 +319,7 @@ const EventDetails = () => {
         eventTime: event.event_time,
         venue: event.venue,
         operator: event.organizer?.business_name || event.organizer_name || "Event Organizer",
+        merchantProfileId: merchantContact?.id || null,
         eventCategory: event.type,
         categorySpecificData: Object.keys(categoryData).length > 0 ? categoryData : undefined,
         selectedAddons: Object.keys(selectedAddons).length > 0 ? selectedAddons : undefined,

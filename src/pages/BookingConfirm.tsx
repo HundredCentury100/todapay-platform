@@ -27,6 +27,7 @@ import { formatTimestamp } from "@/utils/dateFormatters";
 import { createBooking } from "@/services/bookingService";
 import { createAgentBooking } from "@/services/agentBookingService";
 import { bookSeats } from "@/services/busService";
+import { bookEventSeats } from "@/services/eventService";
 import { supabase } from "@/integrations/supabase/client";
 import { getMerchantPaymentMethods, createTransaction, calculatePlatformFee, uploadPaymentProof } from "@/services/paymentService";
 import { agentRemittanceService } from "@/services/agentRemittanceService";
@@ -161,7 +162,13 @@ const BookingConfirm = () => {
         sessionStorage.removeItem('pendingBooking');
         return;
       }
-      loadPaymentMethods();
+      // If merchantProfileId is already provided in bookingData, use it directly
+      if (bookingData.merchantProfileId) {
+        setMerchantProfileId(bookingData.merchantProfileId);
+        loadPaymentMethodsForMerchant(bookingData.merchantProfileId);
+      } else {
+        loadPaymentMethods();
+      }
     }
   }, [bookingData]);
 
@@ -169,6 +176,27 @@ const BookingConfirm = () => {
     navigate("/");
     return null;
   }
+
+  const loadPaymentMethodsForMerchant = async (merchantId: string) => {
+    try {
+      const { data: merchantData, error: merchantError } = await supabase
+        .from('merchant_profiles')
+        .select('id, agent_commission_model, allow_agent_commission_deduction')
+        .eq('id', merchantId)
+        .eq('verification_status', 'verified')
+        .single();
+
+      if (merchantData) {
+        setMerchantAllowsCommissionDeduction(merchantData.allow_agent_commission_deduction ?? true);
+        const methods = await getMerchantPaymentMethods(merchantData.id);
+        setPaymentMethods(methods);
+      }
+    } catch (error) {
+      console.error("Error loading payment methods for merchant:", error);
+    } finally {
+      setLoadingMethods(false);
+    }
+  };
 
   const loadPaymentMethods = async () => {
     try {
@@ -231,28 +259,53 @@ const BookingConfirm = () => {
     const pendingBookingData = { ...bookingData, reservationType: 'pending_payment' };
     let data, error, ref;
 
-    if (bookingData.isAgentBooking && bookingData.agentProfileId) {
-      const agentBookingResult = await createAgentBooking(
-        { ...pendingBookingData, agentProfileId: bookingData.agentProfileId, agentCommissionRate: bookingData.agentCommissionRate, client: bookingData.agentClient },
-        generatedTicketNumber
-      );
-      data = agentBookingResult.data;
-      error = agentBookingResult.error;
-      ref = agentBookingResult.bookingReference;
-    } else {
-      const bookingResult = await createBooking(pendingBookingData, generatedTicketNumber);
-      data = bookingResult.data;
-      error = bookingResult.error;
-      ref = bookingResult.bookingReference;
-    }
+    try {
+      if (bookingData.isAgentBooking && bookingData.agentProfileId) {
+        const agentBookingResult = await createAgentBooking(
+          { ...pendingBookingData, agentProfileId: bookingData.agentProfileId, agentCommissionRate: bookingData.agentCommissionRate, client: bookingData.agentClient },
+          generatedTicketNumber
+        );
+        data = agentBookingResult.data;
+        error = agentBookingResult.error;
+        ref = agentBookingResult.bookingReference;
+      } else {
+        const bookingResult = await createBooking(pendingBookingData, generatedTicketNumber);
+        data = bookingResult.data;
+        error = bookingResult.error;
+        ref = bookingResult.bookingReference;
+      }
 
-    if (error || !data?.id) {
+      if (error || !data?.id) {
+        console.error('Booking creation error:', error);
+        setSaving(false);
+        toast({
+          title: "Booking Error",
+          description: error?.message || "Unable to create booking. Please try again.",
+          variant: "destructive",
+        });
+        throw new Error(error?.message || 'Unable to prepare booking for payment');
+      }
+    } catch (err) {
+      console.error('Error preparing payment:', err);
       setSaving(false);
-      throw new Error('Unable to prepare booking for payment');
+      toast({
+        title: "Payment Preparation Failed",
+        description: "There was an error preparing your booking. Please try again.",
+        variant: "destructive",
+      });
+      throw err;
     }
 
     if (bookingData.type === "bus" && bookingData.selectedSeatIds) {
       await bookSeats(bookingData.scheduleId, bookingData.selectedSeatIds, data.id);
+    }
+
+    if (bookingData.type === "event" && bookingData.selectedSeatIds && bookingData.itemId) {
+      await bookEventSeats({
+        eventId: bookingData.itemId,
+        seatIds: bookingData.selectedSeatIds,
+        bookingId: data.id,
+      });
     }
 
     if (merchantProfileId) {
@@ -327,6 +380,14 @@ const BookingConfirm = () => {
 
     if (bookingData.type === "bus" && bookingData.selectedSeatIds && data?.id) {
       await bookSeats(bookingData.scheduleId, bookingData.selectedSeatIds, data.id);
+    }
+
+    if (bookingData.type === "event" && bookingData.selectedSeatIds && bookingData.itemId && data?.id) {
+      await bookEventSeats({
+        eventId: bookingData.itemId,
+        seatIds: bookingData.selectedSeatIds,
+        bookingId: data.id,
+      });
     }
 
     if (merchantProfileId && methodType && data?.id) {
