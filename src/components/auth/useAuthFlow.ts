@@ -183,7 +183,15 @@ export const useAuthFlow = () => {
       });
 
       if (error || !data?.success) {
-        const msg = (data as any)?.error || (error as any)?.message || "Invalid credentials";
+        // Extract error message from either data.error or error.message or error.context.error
+        let msg = "Invalid credentials";
+        if ((data as any)?.error) {
+          msg = (data as any).error;
+        } else if ((error as any)?.context?.error) {
+          msg = (error as any).context.error;
+        } else if ((error as any)?.message) {
+          msg = (error as any).message;
+        }
         toast({ title: "Sign In Failed", description: msg, variant: "destructive" });
         setLoading(false);
         return;
