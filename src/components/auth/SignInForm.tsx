@@ -99,15 +99,31 @@ export const SignInForm = ({
         transition={{ delay: 0.2 }}
       >
         {authMethod === "phone" ? (
-          <ValidatedInput
-            id="phone" type="tel" label="Phone Number"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            onBlur={() => { setTouched({ ...touched, phone: true }); validateForm(); }}
-            error={errors.phone} touched={touched.phone}
-            placeholder="+263 7X XXX XXXX" required
-            className="h-14 rounded-2xl bg-card border-border"
-          />
+          <>
+            <ValidatedInput
+              id="phone" type="tel" label="Phone Number"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onBlur={() => { setTouched({ ...touched, phone: true }); validateForm(); }}
+              error={errors.phone} touched={touched.phone}
+              placeholder="+263 7X XXX XXXX" required
+              className="h-14 rounded-2xl bg-card border-border"
+            />
+            <ValidatedInput
+              id="password-phone" type="password" label="Password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onBlur={() => { setTouched({ ...touched, password: true }); validateForm(); }}
+              error={errors.password} touched={touched.password}
+              placeholder="••••••••" required
+              className="h-14 rounded-2xl bg-card border-border"
+            />
+            <div className="flex justify-end">
+              <button type="button" onClick={onForgotPassword} className="text-sm text-primary font-semibold hover:text-primary/80 transition-colors">
+                Forgot password?
+              </button>
+            </div>
+          </>
         ) : (
           <>
             <ValidatedInput
@@ -141,7 +157,7 @@ export const SignInForm = ({
           className="w-full h-14 rounded-2xl text-base font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all"
           disabled={loading}
         >
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : authMethod === "phone" ? "Send Code" : "Sign In"}
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
         </Button>
 
         {authMethod === "email" && (
