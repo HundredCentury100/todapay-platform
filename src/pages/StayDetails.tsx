@@ -215,6 +215,7 @@ const StayDetailsContent = () => {
         numGuests: guests,
         numRooms: roomCount,
         operator: property.name,
+        merchantProfileId: property.merchant_profile_id || null,
       },
     });
   };
