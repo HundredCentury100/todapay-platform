@@ -52,6 +52,7 @@ export const useAuthFlow = () => {
   // Sign-in OTP state
   const [signInVerificationId, setSignInVerificationId] = useState<number | null>(null);
   const [signInEmail, setSignInEmail] = useState<string>("");
+  const [signInPhone, setSignInPhone] = useState<string>("");
   const [maskedPhone, setMaskedPhone] = useState<string>("");
 
   const { signIn, signUp, user } = useAuth();
@@ -158,6 +159,7 @@ export const useAuthFlow = () => {
         toast({ title: "Error", description: data?.error || "Failed to resend code", variant: "destructive" });
       } else {
         setSignInVerificationId(data.verificationId);
+        if (data.phone) setSignInPhone(data.phone);
         toast({ title: "Code Sent", description: `A new 6-digit code has been sent to ${data.maskedPhone || 'your phone'}.` });
       }
     } finally {
@@ -189,6 +191,7 @@ export const useAuthFlow = () => {
 
       setSignInVerificationId(data.verificationId);
       setSignInEmail(data.email);
+      setSignInPhone(data.phone || "");
       setMaskedPhone(data.maskedPhone || "your phone");
       setStep("otp-verify");
       toast({ title: "Verify your sign-in", description: `A 6-digit code was sent to ${data.maskedPhone || 'your phone'}.` });
@@ -217,9 +220,9 @@ export const useAuthFlow = () => {
       const { data: verifyData, error: verifyError } = await supabase.functions.invoke('send-sms-otp', {
         body: {
           action: 'verify',
-          phoneNumber: formData.phone || signInEmail,
-          verificationId: signInVerificationId,
+          phoneNumber: signInPhone,
           verificationCode: otpCode,
+          purpose: 'signin',
         },
       });
 

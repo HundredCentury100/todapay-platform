@@ -145,6 +145,7 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
           action: 'send',
           phoneNumber: formData.phone,
           brand: 'TodaPay',
+          purpose: 'signup',
         },
       });
 
@@ -177,7 +178,7 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
   };
 
   const handleVerifyOTP = async (): Promise<boolean> => {
-    if (!verificationId || !otpCode) {
+    if (!otpCode) {
       toast({ title: "Please enter the verification code", variant: "destructive" });
       return false;
     }
@@ -189,8 +190,8 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
         body: {
           action: 'verify',
           phoneNumber: formData.phone,
-          verificationId,
           verificationCode: otpCode,
+          purpose: 'signup',
         },
       });
 
