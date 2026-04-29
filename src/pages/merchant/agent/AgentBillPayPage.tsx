@@ -32,12 +32,12 @@ const billers = [
   { id: "moonlight", name: "Moonlight", description: "Funeral policy", icon: Moon, color: "text-indigo-600", bg: "bg-indigo-500/10", accountLabel: "Policy Number", placeholder: "e.g. ML12345", maxLen: 20, inputMode: "text" as const, validate: (v: string) => v.length >= 4, supportsLookup: true },
 ];
 
-type PaymentMethod = "cash" | "pos" | "suvat_pay" | "omari" | "innbucks";
+type PaymentMethod = "cash" | "pos" | "toda_pay" | "omari" | "innbucks";
 
 const paymentMethods: { value: PaymentMethod; label: string; highlighted?: boolean }[] = [
   { value: "cash", label: "Cash" },
   { value: "pos", label: "POS Terminal" },
-  { value: "suvat_pay", label: "Suvat Pay" },
+  { value: "toda_pay", label: "TodaPay" },
   { value: "omari", label: "O'mari" },
   { value: "innbucks", label: "InnBucks", highlighted: true },
 ];

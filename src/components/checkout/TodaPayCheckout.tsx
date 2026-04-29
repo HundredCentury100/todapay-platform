@@ -87,7 +87,7 @@ export function TodaPayCheckout({
       const returnUrl = `${window.location.origin}/payment/callback`;
       const resultUrl = `${window.location.origin}/payment/result`;
 
-      const { data, error: fnError } = await supabase.functions.invoke('suvat-pay', {
+      const { data, error: fnError } = await supabase.functions.invoke('toda-pay', {
         body: {
           action: 'initiate',
           amount,
@@ -117,7 +117,7 @@ export function TodaPayCheckout({
 
       if (data?.referenceNumber && data?.redirectUrl) {
         // Store payment reference and URL for polling
-        sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
+        sessionStorage.setItem('toda_pay_ref', JSON.stringify({
           referenceNumber: data.referenceNumber,
           bookingId: finalBookingId,
           merchantProfileId: finalMerchantProfileId,

@@ -87,12 +87,12 @@ export function UnifiedTopUp({
       const returnUrl = `${window.location.origin}/payment/callback`;
       const resultUrl = `${window.location.origin}/payment/callback`;
 
-      const { data, error } = await supabase.functions.invoke('suvat-pay', {
+      const { data, error } = await supabase.functions.invoke('toda-pay', {
         body: {
           action: 'initiate',
           amount,
           currencyCode: 'USD',
-          reason: `Suvat Pay - Wallet Top-Up (${convertPrice(amount)})`,
+          reason: `TodaPay - Wallet Top-Up (${convertPrice(amount)})`,
           resultUrl,
           returnUrl,
         },
@@ -107,7 +107,7 @@ export function UnifiedTopUp({
       }
 
       // Store reference and URL for callback processing
-      sessionStorage.setItem('suvat_pay_ref', JSON.stringify({
+      sessionStorage.setItem('toda_pay_ref', JSON.stringify({
         referenceNumber: data.referenceNumber,
         pollUrl: data.pollUrl,
         type: 'wallet_topup',
@@ -303,7 +303,7 @@ export function UnifiedTopUp({
                 <div className="flex-1">
                   <p className="font-semibold">Mobile Money</p>
                   <p className="text-sm text-muted-foreground">
-                    Suvat Pay, O'mari • Instant
+                    TodaPay, O'mari • Instant
                   </p>
                 </div>
                 {paymentMethod === 'mobile_money' && (
@@ -375,7 +375,7 @@ export function UnifiedTopUp({
               className="w-full h-14 text-base font-semibold rounded-xl"
               onClick={handlePayment}
             >
-              Pay {convertPrice(amount)} with Suvat Pay
+              Pay {convertPrice(amount)} with TodaPay
             </Button>
           </div>
         </motion.div>
@@ -394,7 +394,7 @@ export function UnifiedTopUp({
           >
             <Loader2 className="h-16 w-16 text-primary" />
           </motion.div>
-          <h3 className="text-xl font-semibold mt-6 mb-2">Connecting to Suvat Pay</h3>
+          <h3 className="text-xl font-semibold mt-6 mb-2">Connecting to TodaPay</h3>
           <p className="text-muted-foreground text-center">
             You'll be redirected to complete your payment...
           </p>

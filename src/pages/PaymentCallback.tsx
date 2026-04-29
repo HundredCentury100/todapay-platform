@@ -29,7 +29,7 @@ const PaymentCallback = () => {
   const checkPaymentStatus = async (attemptNum: number = 0) => {
     setAttempts(attemptNum);
     try {
-      const storedRef = sessionStorage.getItem('suvat_pay_ref');
+      const storedRef = sessionStorage.getItem('toda_pay_ref');
       if (!storedRef) {
         console.error('No payment reference found in sessionStorage');
         setState('failed');
@@ -57,7 +57,7 @@ const PaymentCallback = () => {
       setPaymentType(detectedType);
       if (amount) setTopUpAmount(amount);
 
-      const { data, error } = await supabase.functions.invoke('suvat-pay', {
+      const { data, error } = await supabase.functions.invoke('toda-pay', {
         body: {
           action: 'check-status',
           referenceNumber,
@@ -85,11 +85,11 @@ const PaymentCallback = () => {
       }
 
       if (data?.paid) {
-        sessionStorage.removeItem('suvat_pay_ref');
+        sessionStorage.removeItem('toda_pay_ref');
         await handlePaymentSuccess(detectedType, walletId, userId, amount, referenceNumber, bookingId);
       } else if (['FAILED', 'CANCELLED', 'DECLINED', 'TIMEOUT'].includes(String(data?.status || '').toUpperCase())) {
         setState('failed');
-        sessionStorage.removeItem('suvat_pay_ref');
+        sessionStorage.removeItem('toda_pay_ref');
       } else if (attemptNum < 20) {
         setTimeout(() => {
           checkPaymentStatus(attemptNum + 1);
@@ -132,7 +132,7 @@ const PaymentCallback = () => {
     referenceNumber: string,
     bookingId: string | undefined
   ) => {
-    sessionStorage.removeItem('suvat_pay_ref');
+    sessionStorage.removeItem('toda_pay_ref');
 
     // Handle driver wallet top-up
     if (detectedType === 'driver_wallet_topup' && walletId) {
@@ -140,7 +140,7 @@ const PaymentCallback = () => {
         await supabase.rpc('topup_user_wallet', {
           p_wallet_id: walletId,
           p_amount: amount,
-          p_payment_reference: `suvat-topup-${referenceNumber}`,
+          p_payment_reference: `toda-topup-${referenceNumber}`,
           p_description: `Driver wallet top-up via TodaPay`,
         });
       } catch (walletErr) {
@@ -156,7 +156,7 @@ const PaymentCallback = () => {
         await supabase.rpc('topup_user_wallet', {
           p_wallet_id: walletId,
           p_amount: amount,
-          p_payment_reference: `suvat-topup-${referenceNumber}`,
+          p_payment_reference: `toda-topup-${referenceNumber}`,
           p_description: `Wallet top-up via TodaPay`,
         });
       } catch (walletErr) {
@@ -316,7 +316,7 @@ const PaymentCallback = () => {
                   <p className="text-sm text-muted-foreground mt-1">
                     {paymentType === 'driver_wallet_topup' || paymentType === 'wallet_topup'
                       ? `$${topUpAmount.toFixed(2)} has been added to your wallet.`
-                      : 'Your payment has been processed securely via Suvat Pay'}
+                      : 'Your payment has been processed securely via TodaPay'}
                   </p>
                 </div>
                 <Button

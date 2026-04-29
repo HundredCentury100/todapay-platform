@@ -130,7 +130,7 @@ export const BillPaymentReceipt = ({ data, onDone }: BillPaymentReceiptProps) =>
 
         {/* Powered by */}
         <p className="text-xs text-center text-muted-foreground">
-          Powered by <span className="font-semibold text-primary">Suvat Pay</span>
+          Powered by <span className="font-semibold text-primary">TodaPay</span>
         </p>
 
         <Button onClick={onDone} className="w-full h-14 rounded-full text-lg font-semibold">

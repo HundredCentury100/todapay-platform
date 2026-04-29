@@ -26,14 +26,14 @@ export const TransferConfirmation = ({
   onBack,
   isLoading,
 }: TransferConfirmationProps) => {
-  const [paymentMethod, setPaymentMethod] = useState("suvat_pay");
+  const [paymentMethod, setPaymentMethod] = useState("toda_pay");
   const { convertPrice } = useCurrency();
 
   const vehicle = VEHICLE_CATEGORIES.find((c) => c.id === formData.vehicleCategory);
   const service = SERVICE_TYPES.find((s) => s.id === formData.serviceType);
 
   const paymentOptions = [
-    { value: "suvat_pay", label: "Suvat Pay", icon: Shield, desc: "Card, Mobile Money, Bank", badge: "Recommended" },
+    { value: "toda_pay", label: "TodaPay", icon: Shield, desc: "Card, Mobile Money, Bank", badge: "Recommended" },
     { value: "cash", label: "Cash", icon: Banknote, desc: "Pay driver directly", badge: null },
     { value: "wallet", label: "Wallet", icon: Wallet, desc: "Use wallet balance", badge: null },
   ];

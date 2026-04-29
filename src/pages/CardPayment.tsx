@@ -119,7 +119,7 @@ const CardPayment = () => {
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
                 <Shield className="h-4 w-4 text-primary" />
-                <span>Secure 3D Secure card processing via Suvat Pay</span>
+                <span>Secure 3D Secure card processing via TodaPay</span>
               </div>
 
               <Button className="w-full h-12 rounded-xl" disabled={!recipientName || numAmount < 1} onClick={() => setStep("confirm")}>

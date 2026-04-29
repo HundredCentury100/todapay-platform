@@ -200,7 +200,7 @@ export default function AgentBillReconciliation() {
           </CardHeader>
           <CardContent className="px-3 pb-3 sm:px-6 sm:pb-6">
             <div className="text-lg sm:text-2xl font-bold text-blue-600">$ {stats.digitalTotal.toFixed(2)}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Suvat Pay, POS, etc.</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">TodaPay, POS, etc.</p>
           </CardContent>
         </Card>
         <Card>

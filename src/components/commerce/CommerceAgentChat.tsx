@@ -110,7 +110,7 @@ export const CommerceAgentChat = () => {
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary" />
             </div>
-            Suvat Commerce Agent
+            TodaPay Commerce Agent
           </SheetTitle>
           <p className="text-xs text-muted-foreground">Search, hold & book across all services</p>
         </SheetHeader>

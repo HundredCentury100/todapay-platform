@@ -335,11 +335,11 @@ export function SmartCheckout({
             <Alert className="bg-primary/5 border-primary/20">
               <CreditCard className="h-4 w-4 text-primary" />
               <AlertDescription className="text-sm">
-                You'll be securely redirected to Suvat Pay to complete your transaction.
+                You'll be securely redirected to TodaPay to complete your transaction.
               </AlertDescription>
             </Alert>
             <div className="text-center text-[10px] text-muted-foreground">
-              Powered by <span className="font-semibold">Suvat Pay</span> · Toda Technologies
+              Powered by <span className="font-semibold">TodaPay</span> · Toda Technologies
             </div>
           </div>
         );
@@ -544,7 +544,7 @@ export function SmartCheckout({
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
-        Powered by <span className="font-semibold">Suvat Pay</span> · By completing this payment, you agree to our terms of service
+        Powered by <span className="font-semibold">TodaPay</span> · By completing this payment, you agree to our terms of service
       </p>
     </div>
   );

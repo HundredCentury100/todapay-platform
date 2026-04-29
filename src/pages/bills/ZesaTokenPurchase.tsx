@@ -57,12 +57,12 @@ const ZesaTokenPurchase = () => {
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<any>(null);
   const [receiptData, setReceiptData] = useState<any>(null);
-  const [showSuvatPay, setShowSuvatPay] = useState(false);
+  const [showTodaPay, setShowTodaPay] = useState(false);
   const [showOmari, setShowOmari] = useState(false);
   const [showInnBucks, setShowInnBucks] = useState(false);
   const [pendingRef, setPendingRef] = useState<{ vendorReference?: string; transactionReference?: string } | null>(null);
   const [retrying, setRetrying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"suvat_pay" | "omari" | "innbucks">("suvat_pay");
+  const [paymentMethod, setPaymentMethod] = useState<"toda_pay" | "omari" | "innbucks">("toda_pay");
 
   const meterValid = /^\d{11}$/.test(meterNumber);
   const amountNum = parseFloat(amount);
@@ -164,7 +164,7 @@ const ZesaTokenPurchase = () => {
       return;
     }
 
-    setShowSuvatPay(true);
+    setShowTodaPay(true);
     setStep('payment');
   };
 
@@ -172,7 +172,7 @@ const ZesaTokenPurchase = () => {
 
 
   const handlePaymentComplete = async (paymentData: any) => {
-    setShowSuvatPay(false);
+    setShowTodaPay(false);
     setLoading(true);
 
     const dateTime = new Date().toLocaleString();
@@ -193,7 +193,7 @@ const ZesaTokenPurchase = () => {
           user_id: user?.id || null, biller_type: "zetdc", biller_name: "ZETDC",
           account_number: meterNumber, amount: amountNum, currency,
           status: "pending_fulfillment", transaction_reference: txRef,
-          payment_method: paymentMethod === "suvat_pay" ? "suvat_pay" : paymentMethod, metadata: { esolutions: data },
+          payment_method: paymentMethod === "toda_pay" ? "toda_pay" : paymentMethod, metadata: { esolutions: data },
         });
         setStep('pending');
         setLoading(false);
@@ -213,7 +213,7 @@ const ZesaTokenPurchase = () => {
     }
 
     // Record in database (works for guests and logged-in users)
-    const usedPaymentMethod = paymentData?.paymentMethod || "suvat_pay";
+    const usedPaymentMethod = paymentData?.paymentMethod || "toda_pay";
     await supabase.from("bill_payments").insert({
       user_id: user?.id || null, biller_type: "zetdc", biller_name: "ZETDC",
       account_number: meterNumber, amount: amountNum, currency,
@@ -245,7 +245,7 @@ const ZesaTokenPurchase = () => {
     setReceiptData({
       reference: txRef, billerName: "ZETDC", billerType: "Electricity Tokens",
       accountNumber: meterNumber, amount: amountNum, currency,
-      paymentMethod: "suvat_pay", dateTime, logoUrl: ZETDC_LOGO,
+      paymentMethod: "toda_pay", dateTime, logoUrl: ZETDC_LOGO,
       tokens: esolutionsResult?.tokens, kwh: esolutionsResult?.kwh,
       energyCharge: esolutionsResult?.energyCharge, debt: esolutionsResult?.debt,
       reaLevy: esolutionsResult?.reaLevy, vat: esolutionsResult?.vat,
@@ -292,7 +292,7 @@ const ZesaTokenPurchase = () => {
         setReceiptData({
           reference: txRef, billerName: "ZETDC", billerType: "Electricity Tokens",
           accountNumber: meterNumber, amount: amountNum, currency,
-          paymentMethod: "suvat_pay", dateTime, logoUrl: ZETDC_LOGO,
+          paymentMethod: "toda_pay", dateTime, logoUrl: ZETDC_LOGO,
           tokens: tokens.length > 0 ? tokens : undefined,
         });
         setStep('receipt');
@@ -448,8 +448,8 @@ const ZesaTokenPurchase = () => {
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Payment Method</Label>
                     <div className="grid grid-cols-3 gap-2">
-                      <button onClick={() => setPaymentMethod("suvat_pay")} className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all min-h-[56px]", paymentMethod === "suvat_pay" ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/40")}>
-                        <span className="text-[10px] font-semibold">Suvat Pay</span>
+                      <button onClick={() => setPaymentMethod("toda_pay")} className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all min-h-[56px]", paymentMethod === "toda_pay" ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/40")}>
+                        <span className="text-[10px] font-semibold">TodaPay</span>
                         <Badge variant="secondary" className="text-[7px] px-1 py-0">Top</Badge>
                       </button>
                       <button onClick={() => setPaymentMethod("omari")} className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all min-h-[56px]", paymentMethod === "omari" ? "border-emerald-500 bg-emerald-500/5" : "border-border/50 hover:border-emerald-500/40")}>
@@ -484,14 +484,14 @@ const ZesaTokenPurchase = () => {
             </motion.div>
           )}
 
-          {/* Step 3: Payment - Suvat Pay */}
-          {step === 'payment' && showSuvatPay && (
+          {/* Step 3: Payment - TodaPay */}
+          {step === 'payment' && showTodaPay && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <TodaPayCheckout
                 amount={amountNum}
                 currency={currency}
                 reason={`ZESA Token - Meter ${meterNumber}`}
-                onCancel={() => { setShowSuvatPay(false); setStep('confirm'); }}
+                onCancel={() => { setShowTodaPay(false); setStep('confirm'); }}
                 onPaymentComplete={handlePaymentComplete}
               />
             </motion.div>

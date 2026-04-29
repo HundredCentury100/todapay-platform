@@ -32,15 +32,15 @@ export const RidePaymentModal = ({
   onPaymentComplete,
 }: RidePaymentModalProps) => {
   const { wallet, balance } = useUserWallet();
-  const [paymentMethod, setPaymentMethod] = useState<string>("suvat_pay");
+  const [paymentMethod, setPaymentMethod] = useState<string>("toda_pay");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showSuvatPay, setShowSuvatPay] = useState(false);
+  const [showTodaPay, setShowTodaPay] = useState(false);
 
   const hasEnoughBalance = balance >= amount;
 
   const handlePayment = async () => {
-    if (paymentMethod === "suvat_pay") {
-      setShowSuvatPay(true);
+    if (paymentMethod === "toda_pay") {
+      setShowTodaPay(true);
       return;
     }
 
@@ -90,39 +90,39 @@ export const RidePaymentModal = ({
     }
   };
 
-  const handleSuvatPayComplete = async (data: any) => {
+  const handleTodaPayComplete = async (data: any) => {
     try {
       await supabase
         .from('active_rides')
         .update({ 
-          payment_method: 'suvat_pay', 
+          payment_method: 'toda_pay', 
           payment_status: 'paid',
           payment_completed_at: new Date().toISOString(),
         })
         .eq('id', rideId);
       
       toast.success("Payment successful!");
-      onPaymentComplete("suvat_pay");
+      onPaymentComplete("toda_pay");
       onOpenChange(false);
     } catch (error) {
-      console.error("Suvat Pay completion error:", error);
+      console.error("TodaPay completion error:", error);
       toast.error("Payment recording failed.");
     }
   };
 
-  if (showSuvatPay) {
+  if (showTodaPay) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Pay with Suvat Pay</DialogTitle>
+            <DialogTitle>Pay with TodaPay</DialogTitle>
             <DialogDescription>Complete your ride payment securely</DialogDescription>
           </DialogHeader>
           <TodaPayCheckout
             amount={amount}
             reason={`Ride payment`}
-            onCancel={() => setShowSuvatPay(false)}
-            onPaymentComplete={handleSuvatPayComplete}
+            onCancel={() => setShowTodaPay(false)}
+            onPaymentComplete={handleTodaPayComplete}
             compact
           />
         </DialogContent>
@@ -149,17 +149,17 @@ export const RidePaymentModal = ({
 
           {/* Payment Methods */}
           <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-            {/* Suvat Pay - Default */}
+            {/* TodaPay - Default */}
             <Label
-              htmlFor="suvat_pay"
+              htmlFor="toda_pay"
               className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                paymentMethod === 'suvat_pay' ? 'border-primary bg-primary/5' : 'border-muted'
+                paymentMethod === 'toda_pay' ? 'border-primary bg-primary/5' : 'border-muted'
               }`}
             >
-              <RadioGroupItem value="suvat_pay" id="suvat_pay" />
+              <RadioGroupItem value="toda_pay" id="toda_pay" />
               <Shield className="h-5 w-5 text-primary" />
               <div className="flex-1">
-                <p className="font-medium">Suvat Pay</p>
+                <p className="font-medium">TodaPay</p>
                 <p className="text-sm text-muted-foreground">Card, Mobile Money, Bank</p>
               </div>
               <Badge variant="secondary" className="bg-primary/10 text-primary">
@@ -218,8 +218,8 @@ export const RidePaymentModal = ({
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
               </>
-             ) : paymentMethod === 'suvat_pay' ? (
-               `Pay $${amount} with Suvat Pay`
+             ) : paymentMethod === 'toda_pay' ? (
+               `Pay $${amount} with TodaPay`
              ) : paymentMethod === 'wallet' ? (
                `Pay $${amount} from Wallet`
             ) : (

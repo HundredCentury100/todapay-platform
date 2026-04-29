@@ -48,7 +48,7 @@ const PaymentVerification = () => {
           customerName: "John Moyo",
           customerPhone: "+263 77 123 4567",
           amount: 45,
-          method: "Suvat Pay",
+          method: "TodaPay",
           submittedAt: "2026-01-29 10:30",
         },
         {

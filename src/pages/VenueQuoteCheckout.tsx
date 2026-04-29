@@ -239,7 +239,7 @@ const VenueQuoteCheckout = () => {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Secure payment powered by Suvat Pay
+              Secure payment powered by TodaPay
             </p>
           </CardContent>
         </Card>

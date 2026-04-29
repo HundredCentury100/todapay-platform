@@ -258,7 +258,7 @@ const BookingConfirm = () => {
     if (merchantProfileId) {
       const feeData = await calculatePlatformFee(merchantProfileId, bookingData.totalPrice, data.id);
       await createTransaction(data.id, merchantProfileId, bookingData.totalPrice, 'payment_gateway', feeData.feePercentage, feeData.feeAmount, {
-        gateway: 'suvat_pay',
+        gateway: 'toda_pay',
         bookedByAgentId: bookingData.agentProfileId,
         agentCommissionDeducted: agentPaymentMethod === 'agent_retains',
         agentRemittanceAmount,

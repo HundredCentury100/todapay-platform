@@ -17,7 +17,7 @@ import {
 
 const MerchantPaymentPortalPage = () => {
   const { convertPrice } = useCurrency();
-  const [paymentMethod, setPaymentMethod] = useState("suvat_pay");
+  const [paymentMethod, setPaymentMethod] = useState("toda_pay");
   const [processing, setProcessing] = useState(false);
   const [amount] = useState(450); // Current balance due
 
@@ -61,15 +61,15 @@ const MerchantPaymentPortalPage = () => {
             <div className="space-y-3">
               <label
                 className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                  paymentMethod === "suvat_pay"
+                  paymentMethod === "toda_pay"
                     ? "border-primary bg-primary/5"
                     : "hover:bg-muted/50"
                 }`}
               >
-                <RadioGroupItem value="suvat_pay" />
+                <RadioGroupItem value="toda_pay" />
                 <Smartphone className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="font-medium text-sm">Suvat Pay</p>
+                  <p className="font-medium text-sm">TodaPay</p>
                   <p className="text-xs text-muted-foreground">Pay via Pesepay gateway</p>
                 </div>
               </label>
@@ -109,7 +109,7 @@ const MerchantPaymentPortalPage = () => {
       </Card>
 
       {/* Payment Details */}
-      {paymentMethod === "suvat_pay" || paymentMethod === "omari" ? (
+      {paymentMethod === "toda_pay" || paymentMethod === "omari" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Payment Details</CardTitle>

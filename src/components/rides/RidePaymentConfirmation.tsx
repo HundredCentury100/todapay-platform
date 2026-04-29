@@ -24,11 +24,11 @@ interface RidePaymentConfirmationProps {
   onConfirmed?: () => void;
 }
 
-type PaymentMethod = 'cash' | 'suvat_pay' | 'omari';
+type PaymentMethod = 'cash' | 'toda_pay' | 'omari';
 
 const PAYMENT_METHODS = [
   { id: 'cash' as PaymentMethod, label: 'Cash', icon: Banknote },
-  { id: 'suvat_pay' as PaymentMethod, label: 'Suvat Pay', icon: Smartphone },
+  { id: 'toda_pay' as PaymentMethod, label: 'TodaPay', icon: Smartphone },
   { id: 'omari' as PaymentMethod, label: "O'mari", icon: Smartphone },
 ];
 

@@ -255,7 +255,7 @@ const PaymentMethods = () => {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">Mobile Money</h4>
-                      <p className="text-sm text-muted-foreground">Suvat Pay, O'mari</p>
+                      <p className="text-sm text-muted-foreground">TodaPay, O'mari</p>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>

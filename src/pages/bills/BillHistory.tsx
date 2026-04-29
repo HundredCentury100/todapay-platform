@@ -72,7 +72,7 @@ const BillHistory = () => {
       accountNumber: selectedPayment.account_number,
       amount: selectedPayment.amount,
       currency: selectedPayment.currency,
-      paymentMethod: selectedPayment.payment_method || "suvat_pay",
+      paymentMethod: selectedPayment.payment_method || "toda_pay",
       dateTime: new Date(selectedPayment.created_at).toLocaleString(),
       tokens: Array.isArray(tokens) ? tokens : undefined,
       kwh: meta?.kwh,

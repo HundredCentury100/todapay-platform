@@ -57,7 +57,7 @@ export const generateBillReceiptPDF = async (data: BillReceiptData): Promise<jsP
   pdf.setFillColor(82, 113, 255);
   pdf.rect(0, 0, pageWidth, 22, 'F');
   pdf.setTextColor(255);
-  text('SUVAT PAY', pageWidth / 2, 8, 10, 'bold', 'center');
+  text('TODAPAY', pageWidth / 2, 8, 10, 'bold', 'center');
   text('Payment Receipt', pageWidth / 2, 14, 7, 'normal', 'center');
   text(`Ref: ${data.reference}`, pageWidth / 2, 19, 6, 'normal', 'center');
   pdf.setTextColor(0);
@@ -81,7 +81,7 @@ export const generateBillReceiptPDF = async (data: BillReceiptData): Promise<jsP
   // Account details
   row('Account', data.accountNumber, y); y += 5;
   row('Amount', `${data.currency} ${data.amount.toFixed(2)}`, y); y += 5;
-  row('Payment', data.paymentMethod === 'suvat_pay' ? 'Suvat Pay' : data.paymentMethod, y); y += 5;
+  row('Payment', data.paymentMethod === 'toda_pay' ? 'TodaPay' : data.paymentMethod, y); y += 5;
   row('Date', data.dateTime, y); y += 5;
   line(y); y += 4;
 
@@ -121,7 +121,7 @@ export const generateBillReceiptPDF = async (data: BillReceiptData): Promise<jsP
   // Footer
   line(y); y += 4;
   pdf.setTextColor(130);
-  text('Powered by Suvat Pay', pageWidth / 2, y, 6, 'normal', 'center');
+  text('Powered by TodaPay', pageWidth / 2, y, 6, 'normal', 'center');
   y += 3;
   text('Toda Technologies · todapayments.com', pageWidth / 2, y, 5, 'normal', 'center');
   y += 4;

@@ -52,7 +52,7 @@ const TermsAndConditions = () => {
                 <h2 className="text-2xl font-semibold mb-3">4. Booking Terms</h2>
                 <div className="space-y-3 text-muted-foreground">
                   <p><strong>4.1 Booking Confirmation:</strong> A booking is confirmed only when you receive a confirmation with a booking reference number via SMS, email, or in-app notification.</p>
-                  <p><strong>4.2 Payment:</strong> Payments are processed via Suvat Pay (powered by Pesepay), O'mari (Old Mutual), or cash at the point of service. Full payment is required at the time of booking unless "Reserve & Pay Cash" is selected.</p>
+                  <p><strong>4.2 Payment:</strong> Payments are processed via TodaPay (powered by Pesepay), O'mari (Old Mutual), or cash at the point of service. Full payment is required at the time of booking unless "Reserve & Pay Cash" is selected.</p>
                   <p><strong>4.3 Cash Reservations:</strong> Cash-reserved bookings have a payment deadline. Failure to pay before the deadline may result in automatic cancellation.</p>
                   <p><strong>4.4 Ticket Validity:</strong> Tickets are valid only for the specified date, time, and route/event.</p>
                   <p><strong>4.5 Name Changes:</strong> Passenger name changes may be subject to fees or restrictions.</p>

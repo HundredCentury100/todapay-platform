@@ -80,14 +80,14 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<"USD" | "ZWG">(config.defaultCurrency);
   const [loading, setLoading] = useState(false);
-  const [showSuvatPay, setShowSuvatPay] = useState(false);
+  const [showTodaPay, setShowTodaPay] = useState(false);
   const [showOmari, setShowOmari] = useState(false);
   const [showInnBucks, setShowInnBucks] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
   const [customerInfo, setCustomerInfo] = useState<{ name?: string; address?: string; balance?: string; monthlyPremium?: string } | null>(null);
   const [pendingRef, setPendingRef] = useState<{ vendorReference?: string; transactionReference?: string } | null>(null);
   const [retrying, setRetrying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"suvat_pay" | "wallet" | "omari" | "innbucks">("suvat_pay");
+  const [paymentMethod, setPaymentMethod] = useState<"toda_pay" | "wallet" | "omari" | "innbucks">("toda_pay");
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [walletId, setWalletId] = useState<string | null>(null);
   const [walletLoading, setWalletLoading] = useState(false);
@@ -218,7 +218,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
       return;
     }
 
-    setShowSuvatPay(true);
+    setShowTodaPay(true);
     setStep("payment");
   };
 
@@ -304,7 +304,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
   };
 
   const handlePaymentComplete = async (paymentData: any) => {
-    setShowSuvatPay(false);
+    setShowTodaPay(false);
     setLoading(true);
 
     const dateTime = new Date().toLocaleString();
@@ -312,7 +312,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
     let esolutionsResult: any = null;
 
     try {
-      // After Suvat Pay collects money, fulfill the bill via eSolutions
+      // After TodaPay collects money, fulfill the bill via eSolutions
       const { data, error } = await supabase.functions.invoke("esolutions-bill-pay", {
         body: {
           action: "pay",
@@ -334,7 +334,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
           user_id: user?.id || null, biller_type: config.id, biller_name: config.name,
           account_number: accountNumber, amount: amountNum, currency,
           status: "pending_fulfillment", transaction_reference: txRef,
-          payment_method: "suvat_pay", metadata: { esolutions: data },
+          payment_method: "toda_pay", metadata: { esolutions: data },
         });
         setStep("pending");
         setLoading(false);
@@ -371,7 +371,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
       currency,
       status: esolutionsResult?.success ? "completed" : "pending_fulfillment",
       transaction_reference: txRef,
-      payment_method: "suvat_pay",
+      payment_method: "toda_pay",
       metadata: esolutionsResult ? { esolutions: esolutionsResult } : null,
       tokens: esolutionsResult?.tokens ? esolutionsResult.tokens : null,
     });
@@ -404,7 +404,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
       accountNumber,
       amount: amountNum,
       currency,
-      paymentMethod: "suvat_pay",
+      paymentMethod: "toda_pay",
       dateTime,
       logoUrl: config.logoUrl,
       tokens: esolutionsResult?.tokens,
@@ -452,7 +452,7 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
         setReceiptData({
           reference: txRef, billerName: config.name, billerType: config.description,
           accountNumber, amount: amountNum, currency,
-          paymentMethod: "suvat_pay", dateTime, logoUrl: config.logoUrl,
+          paymentMethod: "toda_pay", dateTime, logoUrl: config.logoUrl,
           tokens: data.tokens, kwh: data.kwh,
           energyCharge: data.energyCharge, debt: data.debt,
           reaLevy: data.reaLevy, vat: data.vat,
@@ -675,15 +675,15 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
                     <Label className="text-sm font-medium">Payment Method</Label>
                     <div className={cn("grid gap-2", user ? "grid-cols-2" : "grid-cols-3")}>
                       <button
-                        onClick={() => setPaymentMethod("suvat_pay")}
+                        onClick={() => setPaymentMethod("toda_pay")}
                         className={cn(
                           "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all min-h-[56px]",
-                          paymentMethod === "suvat_pay"
+                          paymentMethod === "toda_pay"
                             ? "border-primary bg-primary/5"
                             : "border-border/50 hover:border-primary/40"
                         )}
                       >
-                        <span className="text-[10px] font-semibold">Suvat Pay</span>
+                        <span className="text-[10px] font-semibold">TodaPay</span>
                         <Badge variant="secondary" className="text-[7px] px-1 py-0">Top</Badge>
                       </button>
                       <button
@@ -757,13 +757,13 @@ export const GenericBillPayment = ({ config }: GenericBillPaymentProps) => {
             </motion.div>
           )}
 
-          {step === "payment" && showSuvatPay && (
+          {step === "payment" && showTodaPay && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <TodaPayCheckout
                 amount={totalAmount}
                 currency={currency}
                 reason={`${config.name} - ${accountNumber}${serviceFee > 0 ? ` (incl. $${serviceFee} service fee)` : ''}`}
-                onCancel={() => { setShowSuvatPay(false); setStep("confirm"); }}
+                onCancel={() => { setShowTodaPay(false); setStep("confirm"); }}
                 onPaymentComplete={handlePaymentComplete}
               />
             </motion.div>

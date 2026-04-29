@@ -203,7 +203,7 @@ export const UniversalBillReceipt = ({ data, onDone }: UniversalBillReceiptProps
           <div className="border-t border-border my-1" />
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Payment</span>
-            <span>Suvat Pay</span>
+            <span>TodaPay</span>
           </div>
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Reference</span>
@@ -235,7 +235,7 @@ export const UniversalBillReceipt = ({ data, onDone }: UniversalBillReceiptProps
 
         {/* Powered by */}
         <p className="text-xs text-center text-muted-foreground">
-          Powered by <span className="font-semibold text-primary">Suvat Pay</span>
+          Powered by <span className="font-semibold text-primary">TodaPay</span>
         </p>
 
         <Button onClick={onDone} className="w-full h-14 rounded-full text-lg font-semibold">

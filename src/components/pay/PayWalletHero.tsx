@@ -87,7 +87,7 @@ export const PayWalletHero = ({
             Global
           </div>
           <span className="text-xs text-[hsl(var(--revolut-text-muted))]">
-            Suvat Pay · multi-currency
+            TodaPay · multi-currency
           </span>
         </div>
       </motion.div>

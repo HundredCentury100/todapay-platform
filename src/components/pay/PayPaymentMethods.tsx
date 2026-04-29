@@ -28,7 +28,7 @@ export const PayPaymentMethods = () => {
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium text-sm">Mobile Money</p>
-              <p className="text-xs text-muted-foreground">Suvat Pay, O'mari, InnBucks</p>
+              <p className="text-xs text-muted-foreground">TodaPay, O'mari, InnBucks</p>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </Link>

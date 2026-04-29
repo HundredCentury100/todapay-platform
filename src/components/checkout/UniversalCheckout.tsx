@@ -375,7 +375,7 @@ export const UniversalCheckout = ({
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground/60">
-          Powered by <span className="font-semibold text-muted-foreground/80">Suvat Pay</span> · Toda Technologies
+          Powered by <span className="font-semibold text-muted-foreground/80">TodaPay</span> · Toda Technologies
         </p>
       </div>
     </div>

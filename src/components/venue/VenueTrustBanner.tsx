@@ -5,7 +5,7 @@ const VenueTrustBanner = () => {
     { icon: Shield, text: "Free cancellation up to 48h" },
     { icon: CheckCircle, text: "Verified venue" },
     { icon: Clock, text: "Instant confirmation" },
-    { icon: Smartphone, text: "Suvat Pay & O'mari accepted" },
+    { icon: Smartphone, text: "TodaPay & O'mari accepted" },
   ];
 
   return (

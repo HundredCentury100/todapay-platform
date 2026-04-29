@@ -27,11 +27,11 @@ export function WalletPayment({ amount, onPaymentComplete, disabled }: WalletPay
 
   if (!user || isLoading) return null;
 
-  // Fire-and-forget auto top-up via Suvat Pay when balance drops below threshold
+  // Fire-and-forget auto top-up via TodaPay when balance drops below threshold
   const triggerAutoTopUp = async (walletId: string, topUpAmount: number, userId: string) => {
     try {
       const returnUrl = `${window.location.origin}/payment-callback`;
-      const { data, error } = await supabase.functions.invoke('suvat-pay', {
+      const { data, error } = await supabase.functions.invoke('toda-pay', {
         body: {
           action: 'initiate',
           amount: topUpAmount,
@@ -49,7 +49,7 @@ export function WalletPayment({ amount, onPaymentComplete, disabled }: WalletPay
 
       // Store ref for callback - but don't redirect during checkout
       // Instead, do the top-up silently via the payment webhook when pesepay completes
-      sessionStorage.setItem('suvat_auto_topup_ref', JSON.stringify({
+      sessionStorage.setItem('toda_auto_topup_ref', JSON.stringify({
         referenceNumber: data.referenceNumber,
         type: 'wallet_topup',
         walletId,
@@ -71,7 +71,7 @@ export function WalletPayment({ amount, onPaymentComplete, disabled }: WalletPay
       supabase.from('user_notifications').insert({
         user_id: userId,
         title: '⚡ Auto Top-Up Initiated',
-        message: `Your balance dropped below the threshold. A $${topUpAmount.toFixed(2)} top-up has been initiated via Suvat Pay.`,
+        message: `Your balance dropped below the threshold. A $${topUpAmount.toFixed(2)} top-up has been initiated via TodaPay.`,
         type: 'wallet',
         category: 'payment',
         metadata: { type: 'auto_topup', amount: topUpAmount, redirectUrl: data.redirectUrl },

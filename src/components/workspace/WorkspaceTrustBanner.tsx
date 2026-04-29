@@ -5,7 +5,7 @@ const WorkspaceTrustBanner = () => {
     { icon: Shield, text: "Free cancellation up to 24h" },
     { icon: CheckCircle, text: "Verified space" },
     { icon: Wifi, text: "High-speed WiFi" },
-    { icon: Smartphone, text: "Suvat Pay accepted" },
+    { icon: Smartphone, text: "TodaPay accepted" },
     { icon: Clock, text: "Instant confirmation" },
   ];
 
