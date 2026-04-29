@@ -49,6 +49,10 @@ export const useAuthFlow = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  // Sign-in OTP state
+  const [signInVerificationId, setSignInVerificationId] = useState<number | null>(null);
+  const [signInEmail, setSignInEmail] = useState<string>("");
+  const [maskedPhone, setMaskedPhone] = useState<string>("");
 
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
@@ -66,16 +70,18 @@ export const useAuthFlow = () => {
   const validateForm = () => {
     try {
       if (authMethod === "phone") {
-        if (!formData.phone || formData.phone.length < 10) {
-          setErrors({ phone: "Please enter a valid phone number" });
-          return false;
+        const errs: Record<string, string> = {};
+        if (!formData.phone || formData.phone.replace(/\D/g, '').length < 10) {
+          errs.phone = "Please enter a valid phone number";
         }
         if (isSignUp && !formData.name) {
-          setErrors({ name: "Name is required", phone: "" });
-          return false;
+          errs.name = "Name is required";
         }
-        setErrors({});
-        return true;
+        if (!isSignUp && (!formData.password || formData.password.length < 6)) {
+          errs.password = "Password is required";
+        }
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
       }
       if (isSignUp) {
         signUpSchema.parse(formData);
@@ -139,9 +145,29 @@ export const useAuthFlow = () => {
     return "/";
   };
 
-  const handlePhoneAuth = async () => {
-    const allTouched = isSignUp ? { phone: true, name: true } : { phone: true };
-    setTouched(allTouched);
+  // Resends the SMS OTP for sign-in (re-runs step 1)
+  const handleResendSignInOTP = async () => {
+    const identifier = authMethod === "phone" ? formData.phone : formData.email;
+    if (!identifier || !formData.password) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('signin-with-otp', {
+        body: { identifier, password: formData.password, brand: 'TodaPay' },
+      });
+      if (error || !data?.success) {
+        toast({ title: "Error", description: data?.error || "Failed to resend code", variant: "destructive" });
+      } else {
+        setSignInVerificationId(data.verificationId);
+        toast({ title: "Code Sent", description: `A new 6-digit code has been sent to ${data.maskedPhone || 'your phone'}.` });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 1: validate identifier + password, send SMS OTP
+  const handleSignIn = async () => {
+    setTouched(authMethod === "phone" ? { phone: true, password: true } : { email: true, password: true });
     if (!validateForm()) {
       toast({ title: "Please check your details", variant: "destructive" });
       return;
@@ -149,89 +175,80 @@ export const useAuthFlow = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: formData.phone,
-        options: isSignUp ? { data: { full_name: formData.name } } : undefined,
+      const identifier = authMethod === "phone" ? formData.phone : formData.email;
+      const { data, error } = await supabase.functions.invoke('signin-with-otp', {
+        body: { identifier, password: formData.password, brand: 'TodaPay' },
       });
 
-      if (error) {
-        toast({ title: "Error", description: getFriendlyAuthError(error), variant: "destructive" });
-      } else {
-        toast({ title: "Code Sent", description: "A 6-digit code has been sent to your phone." });
-        setStep("otp-verify");
+      if (error || !data?.success) {
+        const msg = (data as any)?.error || (error as any)?.message || "Invalid credentials";
+        toast({ title: "Sign In Failed", description: msg, variant: "destructive" });
+        setLoading(false);
+        return;
       }
+
+      setSignInVerificationId(data.verificationId);
+      setSignInEmail(data.email);
+      setMaskedPhone(data.maskedPhone || "your phone");
+      setStep("otp-verify");
+      toast({ title: "Verify your sign-in", description: `A 6-digit code was sent to ${data.maskedPhone || 'your phone'}.` });
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Something went wrong", variant: "destructive" });
+      toast({ title: "Sign In Failed", description: err?.message || "Something went wrong", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
+  // Step 2: verify OTP and complete sign-in
   const handleVerifyOTP = async () => {
     if (otpCode.length !== 6) {
       toast({ title: "Invalid Code", description: "Please enter the full 6-digit code.", variant: "destructive" });
       return;
     }
+    if (!signInVerificationId || !signInEmail) {
+      toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
+      setStep("form");
+      return;
+    }
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        phone: formData.phone,
-        token: otpCode,
-        type: "sms",
+      // Verify OTP via BlueDot
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('send-sms-otp', {
+        body: {
+          action: 'verify',
+          phoneNumber: formData.phone || signInEmail,
+          verificationId: signInVerificationId,
+          verificationCode: otpCode,
+        },
       });
 
-      if (error) {
-        toast({ title: "Verification Failed", description: getFriendlyAuthError(error), variant: "destructive" });
+      if (verifyError || !verifyData?.verified) {
+        toast({ title: "Invalid Code", description: verifyData?.error || "Please check the code and try again", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      // Establish the actual session
+      const { error: signInErr } = await signIn(signInEmail, formData.password);
+      if (signInErr) {
+        toast({ title: "Sign In Failed", description: getFriendlyAuthError(signInErr), variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      toast({ title: "Welcome Back!" });
+      if (returnTo) {
+        navigate(returnTo, { replace: true });
       } else {
-        if (isSignUp) {
-          toast({ title: "Welcome!", description: "Your account has been created successfully." });
-          const destination = initialUserType === "driver" ? "/driver/register" : (returnTo || "/");
-          navigate(destination, { replace: true });
-        } else {
-          toast({ title: "Welcome Back!" });
-          const { data: { user: signedInUser } } = await supabase.auth.getUser();
-          if (returnTo) {
-            navigate(returnTo, { replace: true });
-          } else if (signedInUser) {
-            const destination = await resolveBusinessDashboard(signedInUser.id);
-            navigate(destination, { replace: true });
-          } else {
-            navigate("/", { replace: true });
-          }
-        }
+        const { data: { user: signedInUser } } = await supabase.auth.getUser();
+        const destination = signedInUser ? await resolveBusinessDashboard(signedInUser.id) : "/";
+        navigate(destination, { replace: true });
       }
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Something went wrong", variant: "destructive" });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSignIn = async () => {
-    setTouched({ email: true, password: true });
-    if (!validateForm()) {
-      toast({ title: "Please check your details", variant: "destructive" });
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await signIn(formData.email, formData.password);
-
-    if (error) {
-      setLoading(false);
-      toast({ title: "Sign In Failed", description: getFriendlyAuthError(error), variant: "destructive" });
-    } else {
-      toast({ title: "Welcome Back!", description: "You have successfully signed in." });
-      if (returnTo) {
-        setLoading(false);
-        navigate(returnTo, { replace: true });
-      } else {
-        const { data: { user: signedInUser } } = await supabase.auth.getUser();
-        const destination = signedInUser ? await resolveBusinessDashboard(signedInUser.id) : "/";
-        setLoading(false);
-        navigate(destination, { replace: true });
-      }
     }
   };
 
@@ -313,7 +330,9 @@ export const useAuthFlow = () => {
     showResetDialog,
     setShowResetDialog,
     validateForm,
-    handlePhoneAuth,
+    handlePhoneAuth: handleSignIn, // alias kept for resend wiring in Auth.tsx
+    handleResendSignInOTP,
+    maskedPhone,
     handleVerifyOTP,
     handleSignIn,
     handleSignUpSubmit,
