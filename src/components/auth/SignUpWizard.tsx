@@ -407,34 +407,23 @@ export const SignUpWizard = ({ initialRole, onToggleMode }: SignUpWizardProps) =
 
       {/* Navigation Buttons */}
       {currentStep !== "complete" && (
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleBack}
-            className="h-14 rounded-2xl flex-1 text-base font-medium"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <Button
-            type="button"
-            onClick={handleNext}
-            disabled={loading || (currentStep === "role" && !selectedRole)}
-            className="h-14 rounded-2xl flex-[2] text-base font-semibold bg-primary shadow-lg shadow-primary/20"
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <>
-                {currentStep === "account" ? "Send Verification Code" :
-                 currentStep === "otp-verify" ? "Verify & Create Account" :
-                 "Continue"}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
-        </div>
+        <Button
+          type="button"
+          onClick={handleNext}
+          disabled={loading || (currentStep === "role" && !selectedRole)}
+          className="w-full h-14 rounded-2xl text-base font-semibold bg-primary shadow-lg shadow-primary/20"
+        >
+          {loading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <>
+              {currentStep === "account" ? "Send Verification Code" :
+               currentStep === "otp-verify" ? "Verify & Create Account" :
+               "Continue"}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </>
+          )}
+        </Button>
       )}
 
       {/* Toggle to Sign In */}

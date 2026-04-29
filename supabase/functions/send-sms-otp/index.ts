@@ -8,7 +8,8 @@ const corsHeaders = {
 // BlueDotSMS credentials from environment
 const BLUEDOT_API_ID = Deno.env.get('BLUEDOT_API_ID') || '';
 const BLUEDOT_API_PASSWORD = Deno.env.get('BLUEDOT_API_PASSWORD') || '';
-const BLUEDOT_SENDER_ID = Deno.env.get('BLUEDOT_SENDER_ID') || 'TodaPay';
+// Sender ID - use environment variable or default to empty (BlueDotSMS will use default sender ID)
+const BLUEDOT_SENDER_ID = Deno.env.get('BLUEDOT_SENDER_ID') || '';
 const BLUEDOT_BASE_URL = 'https://rest.bluedotsms.com/api';
 
 interface VerifyRequest {
@@ -54,8 +55,12 @@ serve(async (req) => {
         api_password: BLUEDOT_API_PASSWORD,
         brand: brand,
         phonenumber: cleanPhoneNumber,
-        sender_id: BLUEDOT_SENDER_ID,
       });
+
+      // Only add sender_id if it's configured
+      if (BLUEDOT_SENDER_ID) {
+        verifyParams.append('sender_id', BLUEDOT_SENDER_ID);
+      }
 
       const response = await fetch(`${verifyUrl}?${verifyParams.toString()}`, {
         method: 'GET',
