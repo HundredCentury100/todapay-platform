@@ -31,7 +31,7 @@ export const HomeHeader = () => {
                     "there";
 
   return (
-    <header className="bg-background border-b border-border md:hidden">
+    <header className="bg-background border-b border-border md:hidden safe-area-pt">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Left - Avatar/Logo and Location */}
