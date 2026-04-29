@@ -143,7 +143,7 @@ const Auth = () => {
                         setTouched={flow.setTouched}
                         validateForm={flow.validateForm}
                         loading={flow.loading}
-                        onSubmit={flow.authMethod === "phone" ? flow.handlePhoneAuth : flow.handleSignIn}
+                        onSubmit={flow.handleSignIn}
                         onGoogleSignIn={flow.handleGoogleSignIn}
                         onForgotPassword={() => flow.setShowResetDialog(true)}
                         onToggleMode={() => flow.setIsSignUp(true)}
@@ -155,12 +155,12 @@ const Auth = () => {
                 {flow.step === "otp-verify" && (
                   <motion.div key="otp-verify" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                     <OTPVerification
-                      phone={flow.formData.phone}
+                      phone={flow.maskedPhone || flow.formData.phone}
                       otpCode={flow.otpCode}
                       setOtpCode={flow.setOtpCode}
                       loading={flow.loading}
                       onVerify={flow.handleVerifyOTP}
-                      onResend={flow.handlePhoneAuth}
+                      onResend={flow.handleResendSignInOTP}
                     />
                   </motion.div>
                 )}
