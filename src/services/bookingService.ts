@@ -28,7 +28,7 @@ export const createBooking = async (
     
     // First insert to get the booking reference
     const isCashReservation = bookingData.reservationType === 'cash_reserved';
-    const isPendingOnlinePayment = bookingData.reservationType === 'pending_payment';
+    // For online payments, reservation_type is 'paid' but payment_status is 'pending'
     
     const bookingRecord = {
       user_id: user?.id || null,
@@ -60,8 +60,8 @@ export const createBooking = async (
       base_price: bookingData.totalPrice,
       total_price: bookingData.totalPrice,
       group_discount: bookingData.groupDiscount,
-      status: isCashReservation || isPendingOnlinePayment ? 'pending' : 'confirmed',
-      payment_status: isCashReservation || isPendingOnlinePayment ? 'pending' : 'paid',
+      status: isCashReservation ? 'pending' : 'confirmed',
+      payment_status: isCashReservation ? 'pending' : 'paid',
       reservation_type: bookingData.reservationType || 'paid',
       reservation_expires_at: bookingData.reservationExpiresAt || null,
       cash_payment_deadline: isCashReservation ? bookingData.reservationExpiresAt : null,

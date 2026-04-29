@@ -353,11 +353,11 @@ const WorkspaceDetails = () => {
               </Button>
             </DrawerTrigger>
           </PremiumCTADrawerTrigger>
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader>
+          <DrawerContent className="max-h-[90vh] flex flex-col">
+            <DrawerHeader className="flex-shrink-0">
               <DrawerTitle>Book {workspace.name}</DrawerTitle>
             </DrawerHeader>
-            <div className="p-4 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-4 pb-safe">
               <WorkspaceBookingForm workspace={workspace} />
             </div>
           </DrawerContent>

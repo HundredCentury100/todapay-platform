@@ -256,7 +256,8 @@ const BookingConfirm = () => {
 
     setSaving(true);
     const generatedTicketNumber = generateTicketNumber();
-    const pendingBookingData = { ...bookingData, reservationType: 'pending_payment' };
+    // For online payment prep, use 'paid' reservation_type (payment_status will be 'pending')
+    const pendingBookingData = { ...bookingData, reservationType: 'paid' };
     let data, error, ref;
 
     try {
