@@ -64,11 +64,17 @@ serve(async (req) => {
 
       phone = profile.phone || null;
     } else {
+      // Clean phone: remove spaces and dashes, but keep the + if present
       const cleanPhone = identifier.replace(/[\s\-]/g, '');
+      // Also prepare version without + prefix
+      const phoneWithoutPlus = cleanPhone.replace(/^\+/, '');
+      // And version with + prefix
+      const phoneWithPlus = cleanPhone.startsWith('+') ? cleanPhone : `+${cleanPhone}`;
+
       const { data: profile } = await admin
         .from('profiles')
         .select('phone, email')
-        .or(`phone.eq.${cleanPhone},phone.eq.${cleanPhone.replace(/^\+/, '')}`)
+        .or(`phone.eq.${cleanPhone},phone.eq.${phoneWithoutPlus},phone.eq.${phoneWithPlus}`)
         .maybeSingle();
 
       if (!profile) {
