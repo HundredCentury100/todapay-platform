@@ -1,44 +1,22 @@
 import { useState, useEffect } from "react";
-import { ServiceProgressBar } from "@/components/booking/ServiceProgressBar";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import MobileAppLayout from "@/components/MobileAppLayout";
 import BackButton from "@/components/BackButton";
-import Footer from "@/components/Footer";
 import { getWorkspaceById, WorkspaceData } from "@/services/workspaceService";
 import { WorkspaceBookingForm } from "@/components/workspace/WorkspaceBookingForm";
-import { WorkspaceAvailabilityCalendar } from "@/components/workspace/WorkspaceAvailabilityCalendar";
-import { WorkspaceReviews } from "@/components/workspace/WorkspaceReviews";
-import { WorkspaceReviewDialog } from "@/components/workspace/WorkspaceReviewDialog";
-import { WorkspaceHeroGrid } from "@/components/workspace/WorkspaceHeroGrid";
-import { WorkspaceHostCard } from "@/components/workspace/WorkspaceHostCard";
-import { WorkspaceAmenityGrid } from "@/components/workspace/WorkspaceAmenityGrid";
-import { WorkspaceRatingBreakdown } from "@/components/workspace/WorkspaceRatingBreakdown";
-import { WorkspacePriceComparison } from "@/components/workspace/WorkspacePriceComparison";
-import WorkspaceNearbyAttractions from "@/components/workspace/WorkspaceNearbyAttractions";
-import SimilarWorkspaces from "@/components/workspace/SimilarWorkspaces";
-import WorkspaceShareCard from "@/components/workspace/WorkspaceShareCard";
-import WorkspaceTrustBanner from "@/components/workspace/WorkspaceTrustBanner";
-import { RecurringBookingForm } from "@/components/recurring/RecurringBookingForm";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { WorkspaceDetailsSkeleton } from "@/components/ui/detail-page-skeletons";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { MapPin, Users, Clock, CalendarClock, ChevronUp, Star } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Users, Clock, Star, Info, Calendar, MessageSquare, Share2, ArrowLeft } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { PremiumDetailSection, PremiumInfoGrid } from "@/components/premium";
-import { PropertyLocationMap } from "@/components/maps/PropertyLocationMap";
-import { PremiumCTADrawerTrigger } from "@/components/premium/PremiumStickyCTA";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { WorkspaceAmenityGrid } from "@/components/workspace/WorkspaceAmenityGrid";
+import { WorkspaceReviews } from "@/components/workspace/WorkspaceReviews";
+import { PropertyLocationMap } from "@/components/maps/PropertyLocationMap";
+import { WorkspaceAvailabilityCalendar } from "@/components/workspace/WorkspaceAvailabilityCalendar";
 
 const WorkspaceDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +24,7 @@ const WorkspaceDetails = () => {
   const { convertPrice } = useCurrency();
   const [workspace, setWorkspace] = useState<WorkspaceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showRecurringDialog, setShowRecurringDialog] = useState(false);
-  const [isBookingDrawerOpen, setIsBookingDrawerOpen] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (id) {
@@ -83,28 +59,6 @@ const WorkspaceDetails = () => {
     enabled: !!id,
   });
 
-  // Fetch host info
-  const { data: hostInfo } = useQuery({
-    queryKey: ['workspace-host-info', workspace?.merchant_profile_id],
-    queryFn: async () => {
-      if (!workspace?.merchant_profile_id) return null;
-      const { data: profile } = await supabase
-        .from('merchant_profiles')
-        .select('business_name')
-        .eq('id', workspace.merchant_profile_id)
-        .single();
-      const { count } = await supabase
-        .from('workspaces')
-        .select('*', { count: 'exact', head: true })
-        .eq('merchant_profile_id', workspace.merchant_profile_id);
-      return {
-        name: profile?.business_name || 'Host',
-        totalSpaces: count || 1,
-      };
-    },
-    enabled: !!workspace?.merchant_profile_id,
-  });
-
   if (isLoading) {
     return <WorkspaceDetailsSkeleton />;
   }
@@ -112,257 +66,172 @@ const WorkspaceDetails = () => {
   if (!workspace) {
     return (
       <MobileAppLayout hideNav>
-        <main className="flex-1 container mx-auto px-4 py-6 flex items-center justify-center">
-          <p className="text-muted-foreground">Workspace not found</p>
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">Workspace not found</p>
+            <Button onClick={() => navigate('/workspaces')}>Browse Workspaces</Button>
+          </div>
         </main>
       </MobileAppLayout>
     );
   }
 
   return (
-    <MobileAppLayout hideNav className="pb-24 md:pb-0">
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-6">
-        <BackButton className="mb-2" fallbackPath="/workspaces" />
-        <ServiceProgressBar currentStep={3} className="mb-4" />
-        
-        {/* Hero Image Grid */}
-        <WorkspaceHeroGrid
-          images={workspace.images?.length ? workspace.images : ["/placeholder.svg"]}
-          workspaceName={workspace.name}
-          workspaceType={workspace.workspace_type}
-          workspaceId={workspace.id}
-          onShowGallery={() => setShowGallery(true)}
+    <MobileAppLayout hideNav>
+      {/* Hero Image */}
+      <div className="relative w-full h-64 bg-muted">
+        <img
+          src={workspace.images?.[0] || "/placeholder.svg"}
+          alt={workspace.name}
+          className="w-full h-full object-cover"
         />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 left-4 safe-area-pt bg-background/80 backdrop-blur-sm rounded-full"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 safe-area-pt bg-background/80 backdrop-blur-sm rounded-full"
+        >
+          <Share2 className="h-5 w-5" />
+        </Button>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">{workspace.name}</h1>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{workspace.address}, {workspace.city}, {workspace.country}</span>
-                  </div>
-                  {reviewStats && reviewStats.count > 0 && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      <span className="font-semibold">{reviewStats.avg.toFixed(1)}</span>
-                      <span className="text-muted-foreground">· {reviewStats.count} reviews</span>
-                    </div>
-                  )}
-                </div>
-                <WorkspaceShareCard
-                  name={workspace.name}
-                  workspaceType={workspace.workspace_type}
-                  city={workspace.city}
-                  country={workspace.country}
-                  capacity={workspace.capacity}
-                  hourlyRate={workspace.hourly_rate}
-                  image={workspace.images?.[0]}
-                />
-              </div>
-            </motion.div>
-
-            {/* Trust Banner */}
-            <WorkspaceTrustBanner />
-
-            {/* Quick Info Grid */}
-            <PremiumInfoGrid
-              items={[
-                { icon: Users, label: "Capacity", value: `${workspace.capacity} people` },
-                { icon: Clock, label: "Min Booking", value: "1 hour" },
-              ]}
-              columns={2}
-            />
-
-            {/* Host Card */}
-            {hostInfo && (
-              <WorkspaceHostCard
-                hostName={hostInfo.name}
-                totalSpaces={hostInfo.totalSpaces}
-                reviewCount={reviewStats?.count}
-                reviewScore={reviewStats?.avg}
-              />
-            )}
-
-            {/* Description */}
-            {workspace.description && (
-              <PremiumDetailSection title="About this space" delay={0.1}>
-                <p className="text-muted-foreground leading-relaxed">{workspace.description}</p>
-              </PremiumDetailSection>
-            )}
-
-            {/* Categorized Amenities */}
-            <WorkspaceAmenityGrid amenities={workspace.amenities} />
-
-            {/* Price Comparison */}
-            <WorkspacePriceComparison
-              hourlyRate={workspace.hourly_rate}
-              dailyRate={workspace.daily_rate}
-              weeklyRate={workspace.weekly_rate}
-              monthlyRate={workspace.monthly_rate}
-            />
-
-            {/* Operating Hours */}
-            <PremiumDetailSection title="Operating Hours" icon={Clock} delay={0.2}>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                {Object.entries(workspace.operating_hours || {}).map(([day, hours]) => (
-                  <div key={day} className="flex justify-between p-2 rounded-lg bg-muted/30">
-                    <span className="capitalize text-muted-foreground">{day}</span>
-                    <span className="font-medium">{hours ? `${hours.open} - ${hours.close}` : "Closed"}</span>
-                  </div>
-                ))}
-              </div>
-            </PremiumDetailSection>
-
-            {/* Availability */}
-            <WorkspaceAvailabilityCalendar workspace={workspace} />
-
-            {/* Rating Breakdown */}
-            {reviewStats && reviewStats.count > 0 && (
-              <PremiumDetailSection title="Guest Reviews" delay={0.25}>
-                <WorkspaceRatingBreakdown
-                  overallRating={reviewStats.avg}
-                  totalReviews={reviewStats.count}
-                />
-              </PremiumDetailSection>
-            )}
-
-            {/* Reviews */}
-            <WorkspaceReviews workspaceId={workspace.id} />
-
-            {/* Location Map */}
-            <PropertyLocationMap
-              address={workspace.address}
-              city={workspace.city}
-              country={workspace.country}
-              latitude={workspace.latitude}
-              longitude={workspace.longitude}
-              propertyName={workspace.name}
-            />
-
-            {/* What's Nearby */}
-            <WorkspaceNearbyAttractions city={workspace.city} />
-
-            {/* Similar Workspaces */}
-            <SimilarWorkspaces
-              currentWorkspaceId={workspace.id}
-              city={workspace.city}
-              workspaceType={workspace.workspace_type}
-            />
-
-            {/* Leave a Review */}
-            <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/10">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-semibold">Leave a Review</h2>
-                    <p className="text-sm text-muted-foreground">Share your experience with this workspace</p>
-                  </div>
-                  <WorkspaceReviewDialog
-                    workspaceId={workspace.id}
-                    workspaceName={workspace.name}
-                    trigger={
-                      <Button className="shadow-lg shadow-primary/20">
-                        Write Review
-                      </Button>
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recurring Booking */}
-            <Card className="bg-gradient-to-br from-card to-secondary/5 border-secondary/10">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-semibold flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-secondary/10">
-                        <CalendarClock className="h-4 w-4 text-secondary-foreground" />
-                      </div>
-                      Recurring Booking
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Book this workspace on a regular schedule
-                    </p>
-                  </div>
-                  <Dialog open={showRecurringDialog} onOpenChange={setShowRecurringDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="border-secondary/30 hover:bg-secondary/10">
-                        <CalendarClock className="h-4 w-4 mr-2" />
-                        Schedule
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Set Up Recurring Booking</DialogTitle>
-                      </DialogHeader>
-                      <RecurringBookingForm
-                        resourceType="workspace"
-                        resourceId={workspace.id}
-                        resourceName={workspace.name}
-                        pricePerHour={workspace.hourly_rate}
-                        onSuccess={() => setShowRecurringDialog(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Header Info */}
+      <div className="px-4 py-4 border-b">
+        <h1 className="text-2xl font-bold mb-2">{workspace.name}</h1>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+          <MapPin className="h-4 w-4" />
+          <span>{workspace.city}, {workspace.country}</span>
+        </div>
+        {reviewStats && reviewStats.count > 0 && (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <span className="font-semibold">{reviewStats.avg.toFixed(1)}</span>
+            </div>
+            <span className="text-sm text-muted-foreground">({reviewStats.count} reviews)</span>
           </div>
-
-          {/* Booking Sidebar (hidden on mobile) */}
-          <div className="hidden lg:block lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="sticky top-4"
-            >
-              <WorkspaceBookingForm workspace={workspace} />
-            </motion.div>
+        )}
+        {/* Quick Stats */}
+        <div className="flex gap-4 mt-3">
+          <div className="flex items-center gap-1.5 text-sm">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">{workspace.capacity} people</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">1 hour min</span>
           </div>
         </div>
-      </main>
-      <div className="hidden md:block"><Footer /></div>
-
-      {/* Mobile Sticky CTA with Drawer */}
-      <div className="lg:hidden">
-        <Drawer open={isBookingDrawerOpen} onOpenChange={setIsBookingDrawerOpen}>
-          <PremiumCTADrawerTrigger
-            price={workspace.hourly_rate ? convertPrice(workspace.hourly_rate) : "Contact"}
-            priceLabel={workspace.hourly_rate ? "/hr" : ""}
-            ctaText="Book Now"
-            subText="From"
-          >
-            <DrawerTrigger asChild>
-              <Button 
-                size="lg" 
-                className="rounded-xl px-6 shadow-lg shadow-primary/25 bg-gradient-to-r from-primary to-primary/80"
-              >
-                <span className="flex items-center gap-1">
-                  Book Now <ChevronUp className="h-4 w-4" />
-                </span>
-              </Button>
-            </DrawerTrigger>
-          </PremiumCTADrawerTrigger>
-          <DrawerContent className="max-h-[90vh] flex flex-col">
-            <DrawerHeader className="flex-shrink-0">
-              <DrawerTitle>Book {workspace.name}</DrawerTitle>
-            </DrawerHeader>
-            <div className="flex-1 overflow-y-auto p-4 pb-safe">
-              <WorkspaceBookingForm workspace={workspace} />
+        {/* Price */}
+        <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/10">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <span className="text-sm text-muted-foreground">From</span>
+              <span className="text-2xl font-bold text-primary ml-2">
+                {workspace.hourly_rate ? convertPrice(workspace.hourly_rate) : 'Contact for pricing'}
+              </span>
+              {workspace.hourly_rate && <span className="text-sm text-muted-foreground ml-1">/hour</span>}
             </div>
-          </DrawerContent>
-        </Drawer>
+          </div>
+        </div>
       </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        <TabsList className="w-full rounded-none border-b bg-transparent h-auto p-0">
+          <TabsTrigger
+            value="overview"
+            className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            <Info className="h-4 w-4 mr-1.5" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="book"
+            className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            <Calendar className="h-4 w-4 mr-1.5" />
+            Book
+          </TabsTrigger>
+          <TabsTrigger
+            value="reviews"
+            className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            <MessageSquare className="h-4 w-4 mr-1.5" />
+            Reviews
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="flex-1 overflow-y-auto">
+          <TabsContent value="overview" className="m-0 p-4 space-y-4">
+            {/* Description */}
+            {workspace.description && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-2">About this space</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{workspace.description}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Amenities */}
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-3">Amenities</h3>
+                <WorkspaceAmenityGrid amenities={workspace.amenities} />
+              </CardContent>
+            </Card>
+
+            {/* Operating Hours */}
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-3">Operating Hours</h3>
+                <div className="space-y-2">
+                  {Object.entries(workspace.operating_hours || {}).map(([day, hours]) => (
+                    <div key={day} className="flex justify-between text-sm p-2 rounded bg-muted/30">
+                      <span className="capitalize text-muted-foreground">{day}</span>
+                      <span className="font-medium">{hours ? `${hours.open} - ${hours.close}` : "Closed"}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Location */}
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-3">Location</h3>
+                <div className="h-48 bg-muted rounded-lg overflow-hidden">
+                  <PropertyLocationMap
+                    address={workspace.address}
+                    city={workspace.city}
+                    country={workspace.country}
+                    latitude={workspace.latitude}
+                    longitude={workspace.longitude}
+                    propertyName={workspace.name}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">{workspace.address}</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="book" className="m-0 p-4">
+            <WorkspaceBookingForm workspace={workspace} />
+          </TabsContent>
+
+          <TabsContent value="reviews" className="m-0 p-4">
+            <WorkspaceReviews workspaceId={workspace.id} />
+          </TabsContent>
+        </div>
+      </Tabs>
     </MobileAppLayout>
   );
 };
