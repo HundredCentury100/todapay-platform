@@ -1,1 +1,4 @@
 project_id = "celkdpsuqeqmzevlzkqj"
+
+[functions.send-sms-otp]
+verify_jwt = false
