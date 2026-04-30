@@ -3,15 +3,66 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, XCircle, ArrowRight, Wallet, ExternalLink } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, ArrowRight, Wallet, ExternalLink, Ban, AlertTriangle, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { toast } from "sonner";
 
-type PaymentState = 'checking' | 'success' | 'failed';
+type PaymentState = 'checking' | 'success' | 'failed' | 'cancelled' | 'insufficient_funds' | 'pending';
 type PaymentType = 'booking' | 'driver_wallet_topup' | 'wallet_topup' | 'unknown';
+
+// Helper function to get user-friendly status message
+const getStatusMessage = (status: string, statusMessage?: string): { title: string; description: string; icon: 'success' | 'failed' | 'cancelled' | 'insufficient' | 'pending' } => {
+  const statusUpper = String(status || '').toUpperCase();
+
+  if (['SUCCESS', 'PAID', 'COMPLETED', 'COMPLETE', 'SUCCESSFUL', 'APPROVED', 'ACCEPTED'].includes(statusUpper)) {
+    return {
+      title: 'Payment Successful!',
+      description: statusMessage || 'Your payment has been processed successfully.',
+      icon: 'success'
+    };
+  }
+
+  if (['CANCELLED', 'CANCELED'].includes(statusUpper)) {
+    return {
+      title: 'Payment Cancelled',
+      description: statusMessage || 'You cancelled the payment. No charges have been made.',
+      icon: 'cancelled'
+    };
+  }
+
+  if (['INSUFFICIENT_FUNDS', 'INSUFFICIENT FUNDS'].includes(statusUpper)) {
+    return {
+      title: 'Insufficient Funds',
+      description: statusMessage || 'Your account does not have sufficient funds to complete this payment.',
+      icon: 'insufficient'
+    };
+  }
+
+  if (['DECLINED', 'FAILED'].includes(statusUpper)) {
+    return {
+      title: 'Payment Declined',
+      description: statusMessage || 'Your payment was declined. Please try a different payment method.',
+      icon: 'failed'
+    };
+  }
+
+  if (['TIMEOUT', 'EXPIRED'].includes(statusUpper)) {
+    return {
+      title: 'Payment Timeout',
+      description: statusMessage || 'Payment session expired. Please try again.',
+      icon: 'failed'
+    };
+  }
+
+  return {
+    title: 'Payment Pending',
+    description: statusMessage || 'Your payment is being processed. Please wait...',
+    icon: 'pending'
+  };
+};
 
 const PaymentCallback = () => {
   const navigate = useNavigate();
@@ -21,6 +72,11 @@ const PaymentCallback = () => {
   const [topUpAmount, setTopUpAmount] = useState<number>(0);
   const [attempts, setAttempts] = useState(0);
   const [paymentUrl, setPaymentUrl] = useState<string>('');
+  const [statusInfo, setStatusInfo] = useState<{ title: string; description: string; icon: string }>({
+    title: '',
+    description: '',
+    icon: 'pending'
+  });
 
   useEffect(() => {
     checkPaymentStatus(0);
@@ -79,14 +135,34 @@ const PaymentCallback = () => {
       if (data?.paid) {
         sessionStorage.removeItem('toda_pay_ref');
         await handlePaymentSuccess(detectedType, walletId, userId, amount, referenceNumber, bookingId);
-      } else if (['FAILED', 'CANCELLED', 'DECLINED', 'TIMEOUT'].includes(String(data?.status || '').toUpperCase())) {
-        setState('failed');
+      } else if (data?.failed) {
+        // Payment failed with a specific status
+        const statusMsg = getStatusMessage(data.status, data.statusMessage);
+        setStatusInfo(statusMsg);
+
+        // Determine the specific failure state
+        const statusUpper = String(data.status || '').toUpperCase();
+        if (['CANCELLED', 'CANCELED'].includes(statusUpper)) {
+          setState('cancelled');
+        } else if (['INSUFFICIENT_FUNDS', 'INSUFFICIENT FUNDS'].includes(statusUpper)) {
+          setState('insufficient_funds');
+        } else {
+          setState('failed');
+        }
+
         sessionStorage.removeItem('toda_pay_ref');
       } else if (attemptNum < 20) {
+        // Still pending, keep polling
         setTimeout(() => {
           checkPaymentStatus(attemptNum + 1);
         }, 3000);
       } else {
+        // Timeout after 20 attempts
+        setStatusInfo({
+          title: 'Payment Verification Timeout',
+          description: 'We could not verify your payment status. Please contact support if you were charged.',
+          icon: 'failed'
+        });
         setState('failed');
       }
     } catch (err: any) {
@@ -321,6 +397,72 @@ const PaymentCallback = () => {
               </motion.div>
             )}
 
+            {state === 'cancelled' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4"
+              >
+                <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto">
+                  <Ban className="h-8 w-8 text-orange-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-orange-600">{statusInfo.title}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {statusInfo.description}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => navigate(-1)}
+                    className="w-full rounded-xl h-12 touch-manipulation"
+                  >
+                    Try Again
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/')}
+                    className="w-full rounded-xl touch-manipulation"
+                  >
+                    Back to Home
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {state === 'insufficient_funds' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4"
+              >
+                <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto">
+                  <AlertTriangle className="h-8 w-8 text-amber-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-amber-600">{statusInfo.title}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {statusInfo.description}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => navigate(-1)}
+                    className="w-full rounded-xl h-12 touch-manipulation"
+                  >
+                    Try Different Method
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/')}
+                    className="w-full rounded-xl touch-manipulation"
+                  >
+                    Back to Home
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
             {state === 'failed' && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -331,9 +473,11 @@ const PaymentCallback = () => {
                   <XCircle className="h-8 w-8 text-destructive" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-destructive">Payment Failed</h2>
+                  <h2 className="text-xl font-bold text-destructive">
+                    {statusInfo.title || 'Payment Failed'}
+                  </h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    We couldn't verify your payment. Please try again.
+                    {statusInfo.description || 'We couldn\'t verify your payment. Please try again.'}
                   </p>
                 </div>
                 <div className="space-y-2">

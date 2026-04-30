@@ -154,16 +154,24 @@ export function TodaPayCheckout({
           bookingId: finalBookingId,
           merchantProfileId: finalMerchantProfileId,
           amount,
-          paymentUrl: data.redirectUrl, // Store the payment URL
+          paymentUrl: data.redirectUrl,
         }));
 
-        console.log('✅ Payment initiated successfully, starting payment verification...');
+        console.log('✅ Payment initiated successfully');
         console.log('📌 Reference:', data.referenceNumber);
         console.log('🔗 Payment URL:', data.redirectUrl);
-        console.log('⏱️ Starting background polling for payment status...');
 
-        // Navigate directly to payment callback page which will show URL and start polling
-        window.location.href = '/payment/callback';
+        const isNative = Capacitor.isNativePlatform();
+
+        if (isNative) {
+          // Mobile app: Navigate to callback page which shows link + starts polling
+          console.log('📱 Mobile app: Navigating to callback page with payment link');
+          window.location.href = '/payment/callback';
+        } else {
+          // Web (mobile or desktop): Auto-redirect to Pesepay payment page
+          console.log('🌐 Web: Auto-redirecting to Pesepay payment page');
+          window.location.href = data.redirectUrl;
+        }
       } else {
         throw new Error('No reference number or payment URL received from payment gateway');
       }

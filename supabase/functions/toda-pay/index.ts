@@ -310,19 +310,17 @@ serve(async (req) => {
           const isPaid = isPaidStatus(data.transactionStatus);
           console.log('Payment isPaid check:', { status: data.transactionStatus, isPaid, allStatuses: Object.keys(data) });
 
+          const isFailed = isFailedStatus(data.transactionStatus);
+
           return new Response(JSON.stringify({
             success: true,
             paid: isPaid,
+            failed: isFailed,
             status: data.transactionStatus,
             amount: data.amountDetails?.totalTransactionAmount,
             currency: data.amountDetails?.currencyCode,
+            statusMessage: data.statusMessage || data.message || null,
             raw: data,
-            debugInfo: {
-              receivedStatus: data.transactionStatus,
-              isPaidCheck: isPaid,
-              allKeys: Object.keys(data),
-              rawStatusValue: data.transactionStatus,
-            }
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -410,7 +408,7 @@ function isPaidStatus(status: unknown): boolean {
 }
 
 function isFailedStatus(status: unknown): boolean {
-  return ['FAILED', 'CANCELLED', 'CANCELED', 'DECLINED', 'TIMEOUT', 'EXPIRED'].includes(String(status || '').toUpperCase());
+  return ['FAILED', 'CANCELLED', 'CANCELED', 'DECLINED', 'TIMEOUT', 'EXPIRED', 'INSUFFICIENT_FUNDS', 'INSUFFICIENT FUNDS'].includes(String(status || '').toUpperCase());
 }
 
 function toTransactionStatus(status: unknown): 'completed' | 'failed' | 'pending' {
