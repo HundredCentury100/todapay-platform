@@ -103,7 +103,39 @@ export function TodaPayCheckout({
         },
       });
 
-      if (fnError) throw fnError;
+      // Enhanced error logging
+      if (fnError) {
+        console.error('❌ Edge function error:', fnError);
+
+        // Extract the actual error message from the Response context
+        let actualErrorMessage = fnError.message;
+        if (fnError.context && fnError.context instanceof Response) {
+          try {
+            const errorBody = await fnError.context.json();
+            console.error('❌ Actual error from edge function:', errorBody);
+            actualErrorMessage = errorBody.error || errorBody.message || fnError.message;
+          } catch (e) {
+            console.error('Could not parse error response:', e);
+          }
+        }
+
+        console.error('Error details:', {
+          message: fnError.message,
+          actualError: actualErrorMessage,
+          context: fnError.context,
+          details: fnError.details,
+          full: JSON.stringify(fnError, null, 2)
+        });
+
+        throw new Error(actualErrorMessage);
+      }
+
+      // Also check if data contains an error
+      if (data?.error) {
+        console.error('❌ Pesepay API error:', data.error);
+        console.error('Full error response:', JSON.stringify(data, null, 2));
+        throw new Error(data.error);
+      }
 
       console.log('💳 PESEPAY INITIATE RESPONSE:', {
         success: data?.success,
