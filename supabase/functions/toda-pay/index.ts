@@ -10,7 +10,7 @@ const corsHeaders = {
 // Pesepay LIVE production endpoints — sandbox disabled.
 const PESEPAY_ENV = 'live';
 const PESEPAY_HOST = 'api.pesepay.com';
-const PESEPAY_BASE_PATH = '/api/payments-engine';
+const PESEPAY_BASE_PATH = '/api/payments-engine/v1';
 
 // Use Deno.connect with manual TLS to bypass hyper's HTTP header parsing
 async function pesepayRequest(path: string, method: string, body?: string, authKey?: string, timeoutMs = 15000): Promise<{ status: number; body: string }> {
