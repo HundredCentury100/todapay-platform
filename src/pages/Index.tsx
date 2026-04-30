@@ -34,31 +34,31 @@ const Index = () => {
         <HeroSection />
 
         <div className="flex flex-col gap-6 py-2">
-          {/* Services Grid */}
+          {/* Wallet Widget - PROMINENT AT TOP */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: baseDelay, duration: 0.35 }}
           >
-            <ServiceGrid />
+            <WalletWidget />
           </motion.div>
 
-          {/* Wallet Widget */}
+          {/* Prominent Actions: Send Money, Top Up, Pay Bills */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: baseDelay * 2, duration: 0.35 }}
           >
-            <WalletWidget />
+            <QuickActions />
           </motion.div>
 
-          {/* Quick Actions */}
+          {/* Services Grid */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: baseDelay * 3, duration: 0.35 }}
           >
-            <QuickActions />
+            <ServiceGrid />
           </motion.div>
 
           {/* Promo Carousel */}
