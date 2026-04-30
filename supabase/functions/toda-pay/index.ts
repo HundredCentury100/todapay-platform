@@ -319,7 +319,7 @@ serve(async (req) => {
             status: data.transactionStatus,
             amount: data.amountDetails?.totalTransactionAmount,
             currency: data.amountDetails?.currencyCode,
-            statusMessage: data.statusMessage || data.message || null,
+            statusMessage: data.transactionStatusDescription || data.statusMessage || data.message || null,
             raw: data,
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },

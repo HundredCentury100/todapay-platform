@@ -14,7 +14,7 @@ type PaymentState = 'checking' | 'success' | 'failed' | 'cancelled' | 'insuffici
 type PaymentType = 'booking' | 'driver_wallet_topup' | 'wallet_topup' | 'unknown';
 
 // Helper function to get user-friendly status message
-const getStatusMessage = (status: string, statusMessage?: string): { title: string; description: string; icon: 'success' | 'failed' | 'cancelled' | 'insufficient' | 'pending' } => {
+const getStatusMessage = (status: string, statusMessage?: string | null): { title: string; description: string; icon: 'success' | 'failed' | 'cancelled' | 'insufficient' | 'pending' } => {
   const statusUpper = String(status || '').toUpperCase();
 
   if (['SUCCESS', 'PAID', 'COMPLETED', 'COMPLETE', 'SUCCESSFUL', 'APPROVED', 'ACCEPTED'].includes(statusUpper)) {
