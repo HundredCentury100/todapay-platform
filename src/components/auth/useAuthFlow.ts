@@ -229,6 +229,7 @@ export const useAuthFlow = () => {
         body: {
           action: 'verify',
           phoneNumber: signInPhone,
+          verificationId: signInVerificationId,
           verificationCode: otpCode,
           purpose: 'signin',
         },

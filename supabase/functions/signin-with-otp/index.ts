@@ -21,12 +21,6 @@ interface Body {
   brand?: string;
 }
 
-function generate6DigitCode(): string {
-  const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  return (buf[0] % 1_000_000).toString().padStart(6, '0');
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -144,42 +138,22 @@ serve(async (req) => {
     }
 
     const cleanPhoneNumber = phone.replace(/[\s\-\+]/g, '');
-    const code = generate6DigitCode();
 
-    // Step 5: Store OTP code in database
-    const { error: insertErr } = await admin.from('sms_otp_codes').insert({
-      phone: cleanPhoneNumber,
-      code,
-      purpose: 'signin',
-      email,
-    });
-    if (insertErr) {
-      console.error('Failed to store OTP:', insertErr);
-      return new Response(JSON.stringify({
-        error: 'Unable to generate verification code. Please try again in a moment.'
-      }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Step 6: Send SMS via BlueDotSMS
-    const message = `Your ${brand} sign-in code is ${code}. Expires in 10 minutes. Do not share this code.`;
-    const sendParams = new URLSearchParams({
+    // Step 5: Send OTP via BlueDotSMS Verify API (sends 4-digit code automatically)
+    const verifyParams = new URLSearchParams({
       api_id: BLUEDOT_API_ID,
       api_password: BLUEDOT_API_PASSWORD,
-      sms_type: 'T',
-      encoding: 'T',
-      sender_id: BLUEDOT_SENDER_ID,
+      brand: brand,
       phonenumber: cleanPhoneNumber,
-      textmessage: message,
+      sender_id: BLUEDOT_SENDER_ID,
     });
 
-    const response = await fetch(`${BLUEDOT_BASE_URL}/SendSMS?${sendParams.toString()}`);
+    const response = await fetch(`${BLUEDOT_BASE_URL}/Verify?${verifyParams.toString()}`);
     const data = await response.json();
-    console.log('BlueDotSMS SendSMS Response:', data);
+    console.log('BlueDotSMS Verify Response:', data);
 
     if (data.status !== 'S') {
-      const errorMsg = data.remarks || 'Failed to send SMS';
+      const errorMsg = data.remarks || 'Failed to send OTP';
       console.error('BlueDotSMS error:', errorMsg);
       return new Response(JSON.stringify({
         error: `Unable to send verification code: ${errorMsg}. Please check your phone number or try again later.`
@@ -194,7 +168,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({
       success: true,
-      verificationId: data.message_id || 0,
+      verificationId: data.verfication_id || 0,
       email,
       phone: cleanPhoneNumber,
       maskedPhone,
