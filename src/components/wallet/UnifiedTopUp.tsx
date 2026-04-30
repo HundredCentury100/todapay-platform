@@ -17,10 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { 
-  CreditCard, Wallet, CheckCircle, Loader2, 
-  Smartphone, Building2, ArrowLeft, Sparkles
+import {
+  CreditCard, Wallet, CheckCircle, Loader2,
+  ArrowLeft, Sparkles
 } from "lucide-react";
 import { TOP_UP_AMOUNTS } from "@/services/userWalletService";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -37,7 +36,7 @@ interface UnifiedTopUpProps {
   currency?: string;
 }
 
-type PaymentMethod = 'card' | 'eft' | 'mobile_money';
+type PaymentMethod = 'todapay';
 type Step = 'amount' | 'payment' | 'processing' | 'success';
 
 export function UnifiedTopUp({
@@ -53,7 +52,7 @@ export function UnifiedTopUp({
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [step, setStep] = useState<Step>('amount');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mobile_money');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('todapay');
 
   const amount = selectedAmount || Number(customAmount) || 0;
 
@@ -134,7 +133,7 @@ export function UnifiedTopUp({
     setStep('amount');
     setSelectedAmount(null);
     setCustomAmount('');
-    setPaymentMethod('mobile_money');
+    setPaymentMethod('todapay');
     onOpenChange(false);
   };
 
@@ -284,89 +283,21 @@ export function UnifiedTopUp({
               <p className="text-3xl font-bold">{convertPrice(amount)}</p>
             </div>
 
-            {/* Payment Methods */}
-            <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)} className="space-y-3">
-              <Label
-                htmlFor="mobile_money"
-                className={cn(
-                  "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all tap-target",
-                  paymentMethod === 'mobile_money' ? 'border-primary bg-primary/5 shadow-sm' : 'border-muted hover:border-muted-foreground/30'
-                )}
-              >
-                <RadioGroupItem value="mobile_money" id="mobile_money" className="sr-only" />
-                <div className={cn(
-                  "h-12 w-12 rounded-xl flex items-center justify-center",
-                  paymentMethod === 'mobile_money' ? 'bg-green-500' : 'bg-green-100 dark:bg-green-900/30'
-                )}>
-                  <Smartphone className={cn("h-6 w-6", paymentMethod === 'mobile_money' ? 'text-white' : 'text-green-600')} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold">Mobile Money</p>
-                  <p className="text-sm text-muted-foreground">
-                    TodaPay, O'mari • Instant
-                  </p>
-                </div>
-                {paymentMethod === 'mobile_money' && (
-                  <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  </div>
-                )}
-              </Label>
-
-              <Label
-                htmlFor="card"
-                className={cn(
-                  "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all tap-target",
-                  paymentMethod === 'card' ? 'border-primary bg-primary/5 shadow-sm' : 'border-muted hover:border-muted-foreground/30'
-                )}
-              >
-                <RadioGroupItem value="card" id="card" className="sr-only" />
-                <div className={cn(
-                  "h-12 w-12 rounded-xl flex items-center justify-center",
-                  paymentMethod === 'card' ? 'bg-blue-500' : 'bg-blue-100 dark:bg-blue-900/30'
-                )}>
-                  <CreditCard className={cn("h-6 w-6", paymentMethod === 'card' ? 'text-white' : 'text-blue-600')} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold">Card Payment</p>
-                  <p className="text-sm text-muted-foreground">
-                    Visa, Mastercard • Instant
-                  </p>
-                </div>
-                {paymentMethod === 'card' && (
-                  <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  </div>
-                )}
-              </Label>
-
-              <Label
-                htmlFor="eft"
-                className={cn(
-                  "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all tap-target",
-                  paymentMethod === 'eft' ? 'border-primary bg-primary/5 shadow-sm' : 'border-muted hover:border-muted-foreground/30'
-                )}
-              >
-                <RadioGroupItem value="eft" id="eft" className="sr-only" />
-                <div className={cn(
-                  "h-12 w-12 rounded-xl flex items-center justify-center",
-                  paymentMethod === 'eft' ? 'bg-slate-600' : 'bg-slate-100 dark:bg-slate-800'
-                )}>
-                  <Building2 className={cn("h-6 w-6", paymentMethod === 'eft' ? 'text-white' : 'text-slate-600 dark:text-slate-300')} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold">Bank Transfer</p>
-                  <p className="text-sm text-muted-foreground">
-                    Direct deposit • 1-24 hrs
-                  </p>
-                </div>
-                {paymentMethod === 'eft' && (
-                  <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  </div>
-                )}
-              </Label>
-            </RadioGroup>
+            {/* Payment Method */}
+            <div className="flex items-center gap-4 p-4 rounded-2xl border-2 border-primary bg-primary/5 shadow-sm">
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
+                <CreditCard className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold">TodaPay</p>
+                <p className="text-sm text-muted-foreground">
+                  Card · Mobile · Bank
+                </p>
+              </div>
+              <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-white" />
+              </div>
+            </div>
           </div>
 
           {/* Sticky CTA */}
