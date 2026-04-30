@@ -160,7 +160,7 @@ export const useAuthFlow = () => {
       } else {
         setSignInVerificationId(data.verificationId);
         if (data.phone) setSignInPhone(data.phone);
-        toast({ title: "Code Sent", description: `A new 6-digit code has been sent to ${data.maskedPhone || 'your phone'}.` });
+        toast({ title: "Code Sent", description: `A new 4-digit code has been sent to ${data.maskedPhone || 'your phone'}.` });
       }
     } finally {
       setLoading(false);
@@ -202,7 +202,7 @@ export const useAuthFlow = () => {
       setSignInPhone(data.phone || "");
       setMaskedPhone(data.maskedPhone || "your phone");
       setStep("otp-verify");
-      toast({ title: "Verify your sign-in", description: `A 6-digit code was sent to ${data.maskedPhone || 'your phone'}.` });
+      toast({ title: "Verify your sign-in", description: `A 4-digit code was sent to ${data.maskedPhone || 'your phone'}.` });
     } catch (err: any) {
       toast({ title: "Sign In Failed", description: err?.message || "Something went wrong", variant: "destructive" });
     } finally {
@@ -212,8 +212,8 @@ export const useAuthFlow = () => {
 
   // Step 2: verify OTP and complete sign-in
   const handleVerifyOTP = async () => {
-    if (otpCode.length !== 6) {
-      toast({ title: "Invalid Code", description: "Please enter the full 6-digit code.", variant: "destructive" });
+    if (otpCode.length !== 4) {
+      toast({ title: "Invalid Code", description: "Please enter the full 4-digit code.", variant: "destructive" });
       return;
     }
     if (!signInVerificationId || !signInEmail) {

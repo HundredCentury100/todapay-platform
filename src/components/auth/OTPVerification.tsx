@@ -27,26 +27,24 @@ export const OTPVerification = ({
         </motion.div>
         <h2 className="text-2xl font-bold">Enter Verification Code</h2>
         <p className="text-muted-foreground mt-2 text-sm">
-          We sent a 6-digit code to <span className="font-semibold text-foreground">{phone}</span>
+          We sent a 4-digit code to <span className="font-semibold text-foreground">{phone}</span>
         </p>
       </div>
 
       <div className="flex justify-center mb-8">
-        <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+        <InputOTP maxLength={4} value={otpCode} onChange={setOtpCode}>
           <InputOTPGroup>
-            <InputOTPSlot index={0} className="w-12 h-14 text-lg rounded-xl border-border/50" />
-            <InputOTPSlot index={1} className="w-12 h-14 text-lg rounded-xl border-border/50" />
-            <InputOTPSlot index={2} className="w-12 h-14 text-lg rounded-xl border-border/50" />
-            <InputOTPSlot index={3} className="w-12 h-14 text-lg rounded-xl border-border/50" />
-            <InputOTPSlot index={4} className="w-12 h-14 text-lg rounded-xl border-border/50" />
-            <InputOTPSlot index={5} className="w-12 h-14 text-lg rounded-xl border-border/50" />
+            <InputOTPSlot index={0} className="w-14 h-16 text-xl rounded-xl border-border/50" />
+            <InputOTPSlot index={1} className="w-14 h-16 text-xl rounded-xl border-border/50" />
+            <InputOTPSlot index={2} className="w-14 h-16 text-xl rounded-xl border-border/50" />
+            <InputOTPSlot index={3} className="w-14 h-16 text-xl rounded-xl border-border/50" />
           </InputOTPGroup>
         </InputOTP>
       </div>
 
       <Button
         onClick={onVerify}
-        disabled={otpCode.length !== 6 || loading}
+        disabled={otpCode.length !== 4 || loading}
         className="w-full h-14 rounded-2xl text-base font-semibold bg-primary shadow-glow"
       >
         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Continue"}

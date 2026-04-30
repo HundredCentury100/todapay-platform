@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Check Booking Constraint Migration</title>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabaseUrl = 'https://celkdpsuqeqmzevlzkqj.supabase.co';
+    const supabaseKey = 'YOUR_ANON_KEY_HERE'; // You'll need to add your anon key
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function checkConstraint() {
+      console.log('Checking if booking_type constraint allows "stay"...\n');
+
+      const testBooking = {
+        booking_type: 'stay',
+        guest_email: 'test@example.com',
+        item_id: '00000000-0000-0000-0000-000000000000',
+        item_name: 'Test Stay',
+        passenger_name: 'Test User',
+        passenger_email: 'test@example.com',
+        passenger_phone: '1234567890',
+        base_price: 100,
+        total_price: 100,
+        ticket_number: `TEST-${Date.now()}`,
+        status: 'pending',
+        payment_status: 'pending',
+        reservation_type: 'paid'
+      };
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert(testBooking)
+        .select();
+
+      const resultDiv = document.getElementById('result');
+
+      if (error) {
+        if (error.message.includes('bookings_booking_type_check')) {
+          resultDiv.innerHTML = `
+            <div style="color: red; font-weight: bold;">❌ MIGRATION NOT APPLIED</div>
+            <p>Error: ${error.message}</p>
+            <p>The booking_type constraint still only allows 'bus' and 'event'.</p>
+            <h3>To Fix:</h3>
+            <ol>
+              <li>Go to Supabase Dashboard</li>
+              <li>Open SQL Editor</li>
+              <li>Run this SQL:</li>
+            </ol>
+            <pre style="background: #f4f4f4; padding: 10px;">
+ALTER TABLE public.bookings
+DROP CONSTRAINT IF EXISTS bookings_booking_type_check;
+
+ALTER TABLE public.bookings
+ADD CONSTRAINT bookings_booking_type_check
+CHECK (booking_type IN (
+  'bus', 'event', 'stay', 'workspace',
+  'venue', 'experience', 'car', 'transfer',
+  'flight', 'corporate'
+));
+            </pre>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div style="color: orange;">Different error: ${error.message}</div>`;
+        }
+      } else {
+        // Clean up test
+        await supabase.from('bookings').delete().eq('id', data[0].id);
+
+        resultDiv.innerHTML = `
+          <div style="color: green; font-weight: bold;">✅ MIGRATION APPLIED SUCCESSFULLY!</div>
+          <p>The booking_type constraint now allows 'stay' bookings.</p>
+          <p>Test booking was created and cleaned up.</p>
+          <p><strong>You can now book stays without errors!</strong></p>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', checkConstraint);
+  </script>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+  <h1>Booking Type Constraint Test</h1>
+  <div id="result">Testing...</div>
+</body>
+</html>

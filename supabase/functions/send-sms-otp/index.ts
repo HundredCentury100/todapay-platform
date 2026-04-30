@@ -58,104 +58,67 @@ serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     if (action === 'send') {
-      const code = generate6DigitCode();
-
-      // Store code in DB (10-min expiry handled by default)
-      const { error: insertErr } = await admin.from('sms_otp_codes').insert({
-        phone,
-        code,
-        purpose,
-      });
-      if (insertErr) {
-        console.error('Failed to store OTP:', insertErr);
-        return new Response(JSON.stringify({ error: 'Failed to issue code' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      // Send via BlueDotSMS SendSMS API
-      const message = `Your ${brand} verification code is ${code}. Expires in 10 minutes. Do not share this code.`;
-      const sendParams = new URLSearchParams({
+      // Use BlueDotSMS Verify API (sends 4-digit code automatically)
+      const verifyParams = new URLSearchParams({
         api_id: BLUEDOT_API_ID,
         api_password: BLUEDOT_API_PASSWORD,
-        sms_type: 'T',
-        encoding: 'T',
-        sender_id: BLUEDOT_SENDER_ID,
+        brand: brand,
         phonenumber: phone,
-        textmessage: message,
+        sender_id: BLUEDOT_SENDER_ID,
       });
 
-      const response = await fetch(`${BLUEDOT_BASE_URL}/SendSMS?${sendParams.toString()}`);
+      const response = await fetch(`${BLUEDOT_BASE_URL}/Verify?${verifyParams.toString()}`);
       const data = await response.json();
-      console.log('BlueDotSMS SendSMS Response:', data);
+      console.log('BlueDotSMS Verify Response:', data);
 
       if (data.status !== 'S') {
         return new Response(JSON.stringify({
           success: false,
-          error: data.remarks || 'Failed to send SMS',
+          error: data.remarks || 'Failed to send OTP',
         }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
       return new Response(JSON.stringify({
         success: true,
-        // Kept for backwards compat with client code; no longer used
-        verificationId: data.message_id || 0,
+        verificationId: data.verfication_id || 0,
         message: 'Code sent',
       }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     if (action === 'verify') {
-      if (!verificationCode) {
-        return new Response(JSON.stringify({ error: 'Verification code is required' }), {
+      const { verificationId } = body;
+
+      if (!verificationId || !verificationCode) {
+        return new Response(JSON.stringify({ error: 'Verification ID and code are required' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      // Get latest unverified, unexpired code for this phone
-      const { data: rows, error: fetchErr } = await admin
-        .from('sms_otp_codes')
-        .select('id, code, attempts, expires_at, verified')
-        .eq('phone', phone)
-        .eq('verified', false)
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false })
-        .limit(1);
+      console.log('Verifying OTP:', { verificationId, verificationCode });
 
-      if (fetchErr) {
-        console.error('Lookup error:', fetchErr);
-        return new Response(JSON.stringify({ error: 'Verification failed' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      // Use BlueDotSMS VerifyStatus API
+      const verifyStatusParams = new URLSearchParams({
+        verfication_id: verificationId.toString(),
+        verfication_code: verificationCode,
+      });
 
-      const row = rows?.[0];
-      if (!row) {
+      const response = await fetch(`${BLUEDOT_BASE_URL}/VerifyStatus?${verifyStatusParams.toString()}`);
+      const data = await response.json();
+      console.log('BlueDotSMS VerifyStatus Response:', data);
+
+      if (data.status === 'V') {
         return new Response(JSON.stringify({
-          success: false, verified: false,
-          error: 'Code expired or not found. Please request a new code.',
+          success: true,
+          verified: true,
+          message: 'Phone number verified successfully',
+        }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      } else {
+        return new Response(JSON.stringify({
+          success: false,
+          verified: false,
+          error: data.remarks || 'Invalid verification code',
         }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-
-      if (row.attempts >= 5) {
-        return new Response(JSON.stringify({
-          success: false, verified: false,
-          error: 'Too many attempts. Please request a new code.',
-        }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
-
-      if (row.code !== verificationCode.trim()) {
-        await admin.from('sms_otp_codes').update({ attempts: row.attempts + 1 }).eq('id', row.id);
-        return new Response(JSON.stringify({
-          success: false, verified: false,
-          error: 'Invalid verification code',
-        }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
-
-      await admin.from('sms_otp_codes').update({ verified: true }).eq('id', row.id);
-
-      return new Response(JSON.stringify({
-        success: true, verified: true, message: 'Phone number verified successfully',
-      }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     return new Response(JSON.stringify({ error: 'Invalid action. Use "send" or "verify"' }), {
